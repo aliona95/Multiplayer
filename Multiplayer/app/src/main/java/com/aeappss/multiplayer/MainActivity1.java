@@ -192,7 +192,7 @@ public class MainActivity1 extends Activity
                 Log.i("CAMERA", "clicked");
                 //switchToScreen(R.id.activity_main);
                 //setContentView(R.layout.activity_main);
-                Intent cameraIntent = new Intent(getApplicationContext(), CameraActivity.class);
+                Intent cameraIntent = new Intent(getApplicationContext(), Camera2Activity.class);
                 startActivity(cameraIntent);
                 finish();
                 break;
