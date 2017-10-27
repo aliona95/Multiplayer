@@ -3,6 +3,7 @@ package com.aeappss.multiplayer;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -143,21 +144,47 @@ public class MainActivity1 extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.screen_main1);
+        setContentView(R.layout.activity_main1);
         findViewById(R.id.button_sign_in).setOnClickListener(this);
-/*
+
         // Create the Google Api Client with access to Games
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Games.API).addScope(Games.SCOPE_GAMES)
                 .build();
-*/
+
         /*// set up a click listener for everything we care about
         for (int id : CLICKABLES) {
             findViewById(id).setOnClickListener(this);
         }*/
     }
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.button_sign_in) {
+            // start the asynchronous sign in flow
+            Log.i(TAG, "onClick(...)");
+            mSignInClicked = true;
+            mGoogleApiClient.connect();
+        }
+    }
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        // We are now connected!
+        Log.i(TAG, "We are now connected!");
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        // We are not connected anymore!
+        Log.i(TAG, "We are not connected anymore!");
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.i(TAG, "onConnectionFailed");
+    }
+
 /*
     @Override
     public void onClick(View v) {
@@ -415,13 +442,13 @@ public class MainActivity1 extends Activity
      // CALLBACKS SECTION. This section shows how we implement the several games
      // API callbacks.
      //
-
+/*
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.d(TAG, "onConnected() called. Sign in successful!");
 
         Log.d(TAG, "Sign-in succeeded.");
-/*
+
         // register listener so we are notified if we receive an invitation to play
         // while we are in the game
         Games.Invitations.registerInvitationListener(mGoogleApiClient, this);
@@ -438,7 +465,7 @@ public class MainActivity1 extends Activity
             }
         }
         switchToMainScreen();
-*/
+
     }
 
     @Override
@@ -463,18 +490,8 @@ public class MainActivity1 extends Activity
                     connectionResult, RC_SIGN_IN, getString(R.string.signin_other_error));
         }
 
-        //switchToScreen(R.id.screen_sign_in);
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.button_sign_in) {
-            // start the asynchronous sign in flow
-            Log.i(TAG, "onClick(...)");
-            mSignInClicked = true;
-            //mGoogleApiClient.connect();
-        }
-    }
+        switchToScreen(R.id.screen_sign_in);
+    }*/
 
 /*
     // Called when we are connected to the room. We're not ready to play yet! (maybe not everybody
