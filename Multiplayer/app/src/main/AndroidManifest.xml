@@ -23,15 +23,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".MainActivity1">
-        </activity>
+        <activity android:name=".MainActivity1" />
+
         <meta-data
             android:name="com.google.android.gms.games.APP_ID"
             android:value="@string/app_id" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <activity android:name=".CameraActivity" />
+        <activity android:name=".SettingsActivity"></activity>
     </application>
 
 </manifest>

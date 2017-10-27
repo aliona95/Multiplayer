@@ -69,8 +69,9 @@ import java.util.Set;
  * @author Bruno Oliveira (btco), 2013-04-26
  */
 public class MainActivity1 extends Activity
-        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener/*, RealTimeMessageReceivedListener,
-        RoomStatusUpdateListener, RoomUpdateListener, OnInvitationReceivedListener */{
+        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        View.OnClickListener, RealTimeMessageReceivedListener,
+        RoomStatusUpdateListener, RoomUpdateListener, OnInvitationReceivedListener {
     /*Intent mainIntent;
     Button button;
     @Override
@@ -144,7 +145,6 @@ public class MainActivity1 extends Activity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main1);
-        //findViewById(R.id.button_sign_in).setOnClickListener(this);
 
         // Create the Google Api Client with access to Games
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -153,13 +153,13 @@ public class MainActivity1 extends Activity
                 .addApi(Games.API).addScope(Games.SCOPE_GAMES)
                 .build();
 
-        /*// set up a click listener for everything we care about
+        // set up a click listener for everything we care about
         for (int id : CLICKABLES) {
             findViewById(id).setOnClickListener(this);
-        }*/
+        }
     }
 
-/*
+
     @Override
     public void onClick(View v) {
         Intent intent;
@@ -191,23 +191,26 @@ public class MainActivity1 extends Activity
             case R.id.button_camera_game:
                 Log.i("CAMERA", "clicked");
                 //switchToScreen(R.id.activity_main);
-                setContentView(R.layout.activity_main);
-                //setContentView(R.layout.activity_main1);
-                break;
-            case R.id.temp1:
-                Log.i("TEMP", "clicked");
                 //setContentView(R.layout.activity_main);
+                Intent cameraIntent = new Intent(getApplicationContext(), CameraActivity.class);
+                startActivity(cameraIntent);
+                finish();
+                break;
+            case R.id.button_settings:
+                Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(settingsIntent);
+                finish();
                 break;
         }
     }
-*/
+
 
     @Override
     public void onActivityResult(int requestCode, int responseCode, Intent intent) {
 
         super.onActivityResult(requestCode, responseCode, intent);
         switch (requestCode) {
-            /*case RC_SELECT_PLAYERS:
+            case RC_SELECT_PLAYERS:
                 // we got the result from the "select players" UI -- ready to create the room
                 handleSelectPlayersResult(responseCode, intent);
                 break;
@@ -232,7 +235,7 @@ public class MainActivity1 extends Activity
                     leaveRoom();
                 }
                 break;
-            */
+
             case RC_SIGN_IN:
                 Log.d(TAG, "onActivityResult with requestCode == RC_SIGN_IN, responseCode="
                         + responseCode + ", intent=" + intent);
@@ -247,7 +250,7 @@ public class MainActivity1 extends Activity
         }
         super.onActivityResult(requestCode, responseCode, intent);
     }
-/*
+
     // Handle the result of the "Select players UI" we launched when the user clicked the
     // "Invite friends" button. We react by creating a room with those players.
     private void handleSelectPlayersResult(int response, Intent data) {
@@ -318,22 +321,22 @@ public class MainActivity1 extends Activity
         resetGameVars();
         Games.RealTimeMultiplayer.join(mGoogleApiClient, roomConfigBuilder.build());
     }
-*/
+
     // Activity is going to the background. We have to leave the current room.
     @Override
     public void onStop() {
         Log.d(TAG, "**** got onStop");
 
         // if we're in a room, leave it.
-        /*leaveRoom();
+        leaveRoom();
 
         // stop trying to keep the screen on
         stopKeepingScreenOn();
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             switchToMainScreen();
-        }*/
-        super.onStop(); //mGoogleApiClient.disconnect();
+        }
+        super.onStop();
     }
 
     // Activity just got to the foreground. We switch to the wait screen because we will now
@@ -352,7 +355,7 @@ public class MainActivity1 extends Activity
         }
         super.onStart();
     }
-/*
+
     // Handle back key to make sure we cleanly leave a game if we are in the middle of one
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent e) {
@@ -412,7 +415,7 @@ public class MainActivity1 extends Activity
         }
 
     }
-*/
+
     //
      // CALLBACKS SECTION. This section shows how we implement the several games
      // API callbacks.
@@ -426,7 +429,7 @@ public class MainActivity1 extends Activity
 
         // register listener so we are notified if we receive an invitation to play
         // while we are in the game
-        /*Games.Invitations.registerInvitationListener(mGoogleApiClient, this);
+        Games.Invitations.registerInvitationListener(mGoogleApiClient, this);
 
         if (connectionHint != null) {
             Log.d(TAG, "onConnected: connection hint provided. Checking for invite.");
@@ -439,7 +442,7 @@ public class MainActivity1 extends Activity
                 return;
             }
         }
-        switchToMainScreen();*/
+        switchToMainScreen();
 
     }
 
@@ -465,10 +468,10 @@ public class MainActivity1 extends Activity
                     connectionResult, RC_SIGN_IN, getString(R.string.signin_other_error));
         }
 
-      //  switchToScreen(R.id.screen_sign_in);
+        //switchToScreen(R.id.screen_sign_in);
     }
 
-/*
+
     // Called when we are connected to the room. We're not ready to play yet! (maybe not everybody
     // is connected yet).
     @Override
@@ -636,8 +639,8 @@ public class MainActivity1 extends Activity
         mMultiplayer = multiplayer;
         updateScoreDisplay();
         broadcastScore(false);
-        switchToScreen(R.id.screen_game);
 
+        switchToScreen(R.id.screen_game);
         findViewById(R.id.button_click_me).setVisibility(View.VISIBLE);
 
         // run the gameTick() method every second to update the game.
@@ -782,13 +785,14 @@ public class MainActivity1 extends Activity
     // event handlers.
     final static int[] CLICKABLES = {
             R.id.button_accept_popup_invitation, R.id.button_invite_players,
-            R.id.button_see_invitations, R.id.button_click_me, R.id.button_camera_game
+            R.id.button_see_invitations, R.id.button_click_me, R.id.button_camera_game,
+            R.id.button_settings
     };
 
     // This array lists all the individual screens our game has.
     final static int[] SCREENS = {
             R.id.screen_game, R.id.screen_main,
-            R.id.screen_wait, R.id.screen_temp
+            R.id.screen_wait
     };
     int mCurScreen = -1;
 
@@ -877,6 +881,6 @@ public class MainActivity1 extends Activity
     // Clears the flag that keeps the screen on.
     void stopKeepingScreenOn() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    }*/
+    }
 }
 

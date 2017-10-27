@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android" android:title="something">
+
+       <!-- <Preference
+            android:title="Atstumas (metrais)"
+            android:id="@+id/editText1"
+            android:key="shake"
+            android:summary="Nustatykite atstumą, kuriuo bus vykdoma objektų paieška"/>-->
+
+        <Preference
+            title="Title"
+            android:title="Judesio greitis1">
+                <intent
+                    android:action="android.intent.action."
+                    android:targetPackage="com.example.game"
+                    android:targetClass="com.example.game.ShakeActivity"
+                    />
+        </Preference>
+
+
+
+</PreferenceScreen>
