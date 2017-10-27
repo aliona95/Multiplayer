@@ -69,8 +69,7 @@ import java.util.Set;
  * @author Bruno Oliveira (btco), 2013-04-26
  */
 public class MainActivity1 extends Activity
-        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        View.OnClickListener/*, RealTimeMessageReceivedListener,
+        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener/*, RealTimeMessageReceivedListener,
         RoomStatusUpdateListener, RoomUpdateListener, OnInvitationReceivedListener */{
     /*Intent mainIntent;
     Button button;
@@ -145,7 +144,7 @@ public class MainActivity1 extends Activity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main1);
-        findViewById(R.id.button_sign_in).setOnClickListener(this);
+        //findViewById(R.id.button_sign_in).setOnClickListener(this);
 
         // Create the Google Api Client with access to Games
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -158,31 +157,6 @@ public class MainActivity1 extends Activity
         for (int id : CLICKABLES) {
             findViewById(id).setOnClickListener(this);
         }*/
-    }
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.button_sign_in) {
-            // start the asynchronous sign in flow
-            Log.i(TAG, "onClick(...)");
-            mSignInClicked = true;
-            mGoogleApiClient.connect();
-        }
-    }
-    @Override
-    public void onConnected(Bundle connectionHint) {
-        // We are now connected!
-        Log.i(TAG, "We are now connected!");
-    }
-
-    @Override
-    public void onConnectionSuspended(int cause) {
-        // We are not connected anymore!
-        Log.i(TAG, "We are not connected anymore!");
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.i(TAG, "onConnectionFailed");
     }
 
 /*
@@ -227,13 +201,13 @@ public class MainActivity1 extends Activity
         }
     }
 */
-/*
+
     @Override
     public void onActivityResult(int requestCode, int responseCode, Intent intent) {
 
         super.onActivityResult(requestCode, responseCode, intent);
         switch (requestCode) {
-            case RC_SELECT_PLAYERS:
+            /*case RC_SELECT_PLAYERS:
                 // we got the result from the "select players" UI -- ready to create the room
                 handleSelectPlayersResult(responseCode, intent);
                 break;
@@ -258,6 +232,7 @@ public class MainActivity1 extends Activity
                     leaveRoom();
                 }
                 break;
+            */
             case RC_SIGN_IN:
                 Log.d(TAG, "onActivityResult with requestCode == RC_SIGN_IN, responseCode="
                         + responseCode + ", intent=" + intent);
@@ -271,7 +246,7 @@ public class MainActivity1 extends Activity
                 break;
         }
         super.onActivityResult(requestCode, responseCode, intent);
-    }*/
+    }
 /*
     // Handle the result of the "Select players UI" we launched when the user clicked the
     // "Invite friends" button. We react by creating a room with those players.
@@ -345,27 +320,27 @@ public class MainActivity1 extends Activity
     }
 */
     // Activity is going to the background. We have to leave the current room.
-    /*@Override
+    @Override
     public void onStop() {
         Log.d(TAG, "**** got onStop");
 
         // if we're in a room, leave it.
-        leaveRoom();
+        /*leaveRoom();
 
         // stop trying to keep the screen on
         stopKeepingScreenOn();
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             switchToMainScreen();
-        }
-        super.onStop(); mGoogleApiClient.disconnect();
-    }*/
+        }*/
+        super.onStop(); //mGoogleApiClient.disconnect();
+    }
 
     // Activity just got to the foreground. We switch to the wait screen because we will now
     // go through the sign-in flow (remember that, yes, every time the Activity comes back to the
     // foreground we go through the sign-in flow -- but if the user is already authenticated,
     // this flow simply succeeds and is imperceptible).
-   /* @Override
+    @Override
     public void onStart() {
         if (!mGoogleApiClient.isConnected()) {
             Log.d(TAG,"Connecting client.");
@@ -376,7 +351,7 @@ public class MainActivity1 extends Activity
                     "GameHelper: client was already connected on onStart()");
         }
         super.onStart();
-    }*/
+    }
 /*
     // Handle back key to make sure we cleanly leave a game if we are in the middle of one
     @Override
@@ -442,7 +417,7 @@ public class MainActivity1 extends Activity
      // CALLBACKS SECTION. This section shows how we implement the several games
      // API callbacks.
      //
-/*
+
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.d(TAG, "onConnected() called. Sign in successful!");
@@ -451,7 +426,7 @@ public class MainActivity1 extends Activity
 
         // register listener so we are notified if we receive an invitation to play
         // while we are in the game
-        Games.Invitations.registerInvitationListener(mGoogleApiClient, this);
+        /*Games.Invitations.registerInvitationListener(mGoogleApiClient, this);
 
         if (connectionHint != null) {
             Log.d(TAG, "onConnected: connection hint provided. Checking for invite.");
@@ -464,7 +439,7 @@ public class MainActivity1 extends Activity
                 return;
             }
         }
-        switchToMainScreen();
+        switchToMainScreen();*/
 
     }
 
@@ -490,8 +465,8 @@ public class MainActivity1 extends Activity
                     connectionResult, RC_SIGN_IN, getString(R.string.signin_other_error));
         }
 
-        switchToScreen(R.id.screen_sign_in);
-    }*/
+      //  switchToScreen(R.id.screen_sign_in);
+    }
 
 /*
     // Called when we are connected to the room. We're not ready to play yet! (maybe not everybody

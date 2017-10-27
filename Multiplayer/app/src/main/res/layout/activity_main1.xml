@@ -7,11 +7,11 @@
     tools:context="com.aeappss.multiplayer.MainActivity">
 
 
-    <!-- SIGN-IN SCREEN-->
+    <!-- SIGN-IN SCREEN
 
 
     <com.google.android.gms.common.SignInButton android:id="@+id/button_sign_in"
         style="@style/SignInButton" />
-
+-->
 
 </android.support.constraint.ConstraintLayout>
