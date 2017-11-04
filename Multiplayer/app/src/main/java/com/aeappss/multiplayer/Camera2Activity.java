@@ -71,6 +71,8 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import static java.lang.Math.abs;
+
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class Camera2Activity extends AppCompatActivity implements SensorEventListener {
 
@@ -90,7 +92,7 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
     private Button throwingButton;
 
     private long lastUpdate = 0;
-    private float last_x, last_y, last_z;
+    private float last_x = -5, last_y = 0, last_z = 0;
     private static final int SHAKE_THRESHOLD = 600;
 
     @Override
@@ -113,7 +115,7 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
         throwingButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 firstBar.setVisibility(View.VISIBLE);
-                firstBar.setMax(10);
+                firstBar.setMax(20);
                 //firstBar.setProgress(0);
                 //firstBar.setProgress(3);
                 throwingButton.setVisibility(View.INVISIBLE);
@@ -281,6 +283,17 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
         }
     }
 
+    float maxDown = 0;
+    boolean doneDown = false;
+    boolean doneUp = false;
+    boolean was = false;
+    boolean was1 = false;
+    float downX = 0;
+    float upX = 0;
+    long curTimeThrow;
+    long allThrowingTime;
+    float accelerometerDistance;
+    float accelerometerSpeed;
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor mySensor = sensorEvent.sensor;
@@ -292,15 +305,82 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
 
             long curTime = System.currentTimeMillis();
 
-            if ((curTime - lastUpdate) > 200) {
+            if((curTime/1000 - lastUpdate/1000 > 0.001) && last_x > x && (last_x <= 0 && x <= 0 && last_x - x > 0.5) && !doneDown){ // atgal
+                    Log.i("PASUKIMAS ", "IESKOMA " + String.valueOf(x));
+                    firstBar.setProgress(Math.abs(Math.round(Math.abs(x))));
+                    lastUpdate = curTime;
+                    was = true;
+                    last_x = x;
+            } // priesingu atveju jei padaugeja paklaida einant i kita puse, nustojama, issaugomi duomenys ir vykdoma i prieki
+            else if((curTime/1000 - lastUpdate/1000 > 0.001) && last_x < x && (last_x <= 0 && x <= 0 && abs(last_x) - abs(x) > 2) && !doneDown && was){   // laika iki 0.5 gal sumazint???
+                Log.i("PASUKIMAS ", "GAUTAS " + last_x);
+                lastUpdate = curTime;
+                doneDown = true;
+                downX = last_x;
+                curTimeThrow = System.currentTimeMillis();   // nustatome laika, kai pasiekiame galines koord
+            }
+
+            if((curTime/1000 - lastUpdate/1000 > 0.001) && doneDown && last_x < x && abs(last_x) - abs(x) > 0.5 && !doneUp){
+                Log.i("PASUKIMAS ", "IESKOMA KITO " + String.valueOf(x));
+                lastUpdate = curTime;
+                was1 = true;
+                last_x = x;
+            }else if((curTime/1000 - lastUpdate/1000 > 0.001) && abs(x) - abs(last_x) > 0.5 && !doneUp && was1){
+                Log.i("PASUKIMAS ", "GAUTAS KITO " + last_x);
+                lastUpdate = curTime;
+                doneUp = true;
+                upX = last_x;
+                allThrowingTime = System.currentTimeMillis() - curTimeThrow;
+                Log.i("PASUKIMAS ", "GAUTAS LAIKAS " + allThrowingTime/1000 + "s");
+            }
+
+            if(doneDown && doneUp){
+                accelerometerDistance = abs(downX) + abs(upX);
+                Log.i("PASUKIMAS ", "ATSTUMAS " + accelerometerDistance);
+                accelerometerSpeed = accelerometerDistance*(allThrowingTime/1000);
+                Log.i("PASUKIMAS ", "GREITIS " + accelerometerSpeed + "m/s");
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            /*if ((curTime - lastUpdate) > 200) {
                 long diffTime = (curTime - lastUpdate);
                 Log.i("TAG", "LAIKAAAAAAS " + diffTime);
 
                 lastUpdate = curTime;
 
-                float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000/2;
+                float speed = Math.abs(x + y + z - last_x - last_y - last_z);/// diffTime * 10000/2;
                 Log.i("TAG", "SPEED " + speed);
                 if (speed > SHAKE_THRESHOLD) {
+                    Log.i("RESOLUTION", String.valueOf(mySensor.getResolution()) + " DELAY " + mySensor.getMaximumRange());
                     Toast toast = Toast.makeText(getApplicationContext(), "Įrenginys pajudintas. Greitis: " + speed, Toast.LENGTH_SHORT);
                     toast.show();
                 }
@@ -330,7 +410,7 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
 
                     }
                 }
-            }
+            }*/
         }
     }
 

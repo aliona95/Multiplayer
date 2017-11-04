@@ -56,7 +56,7 @@
 
     <!-- GAMEPLAY SCREEN -->
     <LinearLayout android:id="@+id/screen_game" style="@style/LLScreen"
-        android:background="@color/background">
+        android:background="@color/colorPrimary">
         <TextView android:id="@+id/instructions"
             style="@style/Instructions" android:text="@string/instructions" />
         <TextView android:id="@+id/my_score" style="@style/ScoreDisplay" />
@@ -66,7 +66,8 @@
             android:layout_marginBottom="20dp" />
         <TextView android:id="@+id/countdown" style="@style/FigureLabel" />
 
-        <LinearLayout style="@style/ScoresBox">
+        <LinearLayout style="@style/ScoresBox"
+            android:background="@color/colorPrimaryDark">
             <TextView android:id="@+id/score0" style="@style/ScoreText" />
             <TextView android:id="@+id/score1" style="@style/ScoreText" />
             <TextView android:id="@+id/score2" style="@style/ScoreText" />

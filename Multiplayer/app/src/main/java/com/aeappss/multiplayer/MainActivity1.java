@@ -1,9 +1,17 @@
 package com.aeappss.multiplayer;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -22,6 +30,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,6 +48,10 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.example.games.basegameutils.BaseGameUtils;
 
 import java.util.ArrayList;
@@ -71,7 +84,7 @@ import java.util.Set;
 public class MainActivity1 extends Activity
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener, RealTimeMessageReceivedListener,
-        RoomStatusUpdateListener, RoomUpdateListener, OnInvitationReceivedListener {
+        RoomStatusUpdateListener, RoomUpdateListener, OnInvitationReceivedListener, LocationListener {
     /*Intent mainIntent;
     Button button;
     @Override
@@ -95,6 +108,11 @@ public class MainActivity1 extends Activity
     //API INTEGRATION SECTION. This section contains the code that integrates
     // the game with the Google Play game services API.
     //
+
+    private LocationManager locationManager;
+    private String provider;
+    private float lat;
+    private float lng;
 
     final static String TAG = "ButtonClicker2000";
 
@@ -138,24 +156,54 @@ public class MainActivity1 extends Activity
 
     // Message buffer for sending messages
     byte[] mMsgBuf = new byte[2];
-
+    private Location location;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main1);
+        Log.i("LOGAS", "AS CIA");
 
         // Create the Google Api Client with access to Games
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Games.API).addScope(Games.SCOPE_GAMES)
+                .addApi(LocationServices.API)
+                .setViewForPopups(findViewById(android.R.id.content))
                 .build();
 
         // set up a click listener for everything we care about
         for (int id : CLICKABLES) {
             findViewById(id).setOnClickListener(this);
+        }
+
+        // Get the location manager
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        // Define the criteria how to select the locatioin provider -> use
+        // default
+        Criteria criteria = new Criteria();
+        provider = locationManager.getBestProvider(criteria, false);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        Location location = locationManager.getLastKnownLocation(provider);
+
+        // Initialize the location fields
+        if (location != null) {
+            System.out.println("Provider " + provider + " has been selected.");
+            onLocationChanged(location);
+            Log.i("Rasta", "Find Location");
+        } else {
+            Log.i("Nerasta", "Can't find location");
         }
     }
 
@@ -244,7 +292,7 @@ public class MainActivity1 extends Activity
                 if (responseCode == RESULT_OK) {
                     mGoogleApiClient.connect();
                 } else {
-                    BaseGameUtils.showActivityResultError(this,requestCode,responseCode, R.string.signin_other_error);
+                    BaseGameUtils.showActivityResultError(this, requestCode, responseCode, R.string.signin_other_error);
                 }
                 break;
         }
@@ -346,7 +394,7 @@ public class MainActivity1 extends Activity
     @Override
     public void onStart() {
         if (!mGoogleApiClient.isConnected()) {
-            Log.d(TAG,"Connecting client.");
+            Log.d(TAG, "Connecting client.");
             //switchToScreen(R.id.screen_wait);
             mGoogleApiClient.connect();
         } else {
@@ -409,7 +457,7 @@ public class MainActivity1 extends Activity
     @Override
     public void onInvitationRemoved(String invitationId) {
 
-        if (mIncomingInvitationId.equals(invitationId)&&mIncomingInvitationId!=null) {
+        if (mIncomingInvitationId.equals(invitationId) && mIncomingInvitationId != null) {
             mIncomingInvitationId = null;
             switchToScreen(mCurScreen); // This will hide the invitation popup
         }
@@ -417,9 +465,9 @@ public class MainActivity1 extends Activity
     }
 
     //
-     // CALLBACKS SECTION. This section shows how we implement the several games
-     // API callbacks.
-     //
+    // CALLBACKS SECTION. This section shows how we implement the several games
+    // API callbacks.
+    //
 
     @Override
     public void onConnected(Bundle connectionHint) {
@@ -437,12 +485,30 @@ public class MainActivity1 extends Activity
                     .getParcelable(Multiplayer.EXTRA_INVITATION);
             if (inv != null && inv.getInvitationId() != null) {
                 // retrieve and cache the invitation ID
-                Log.d(TAG,"onConnected: connection hint has a room invite!");
+                Log.d(TAG, "onConnected: connection hint has a room invite!");
                 acceptInviteToRoom(inv.getInvitationId());
                 return;
             }
         }
         switchToMainScreen();
+
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        location = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (location != null) {
+            lat = (float) location.getLatitude();
+            lng = (float) location.getLongitude();
+        }
 
     }
 
@@ -852,9 +918,10 @@ public class MainActivity1 extends Activity
                     continue;
                 if (p.getStatus() != Participant.STATUS_JOINED)
                     continue;
+                int pl = 2;
                 int score = mParticipantScore.containsKey(pid) ? mParticipantScore.get(pid) : 0;
-                ((TextView) findViewById(arr[i])).setText(formatScore(score) + " - " +
-                        p.getDisplayName());
+                ((TextView) findViewById(arr[i])).setText(formatScore(score) + " - " + p.getDisplayName() +
+                "\nlat - " + lat + "\nlng - " + lng);
                 ++i;
             }
         }
@@ -868,7 +935,6 @@ public class MainActivity1 extends Activity
      // MISC SECTION. Miscellaneous methods.
      //
 
-
     // Sets the flag to keep this screen on. It's recommended to do that during
     // the
     // handshake when setting up a game, because if the screen turns off, the
@@ -881,6 +947,14 @@ public class MainActivity1 extends Activity
     // Clears the flag that keeps the screen on.
     void stopKeepingScreenOn() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        lat = (float) location.getLatitude();
+        lng = (float) location.getLongitude();
+        Log.d(TAG, "Kordinates: " +  lat + "," + lng);
+        Toast.makeText(this, "Kordinates" + lat, Toast.LENGTH_LONG).show();
     }
 }
 
