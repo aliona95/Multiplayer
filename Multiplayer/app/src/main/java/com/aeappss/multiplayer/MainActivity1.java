@@ -16,6 +16,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.math.RoundingMode;
+import java.nio.ByteBuffer;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 
@@ -155,9 +160,13 @@ public class MainActivity1 extends Activity
     String mIncomingInvitationId = null;
 
     // Message buffer for sending messages
-    byte[] mMsgBuf = new byte[2];
+    byte[] mMsgBuf = new byte[10];
     private Location location;
 
+    // Distance between two players TO DO: HASH MAP.
+    float mDistance = -1; //for check -1
+    float [] mOppnentCoord = new float[2];
+    LocationRequest mLocationRequest;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -180,6 +189,7 @@ public class MainActivity1 extends Activity
         }
 
         // Get the location manager
+        /*
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         // Define the criteria how to select the locatioin provider -> use
         // default
@@ -205,6 +215,7 @@ public class MainActivity1 extends Activity
         } else {
             Log.i("Nerasta", "Can't find location");
         }
+        */
     }
 
 
@@ -493,23 +504,57 @@ public class MainActivity1 extends Activity
         switchToMainScreen();
 
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10);
+        mLocationRequest.setFastestInterval(10);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
-        location = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
+
+        location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (location != null) {
             lat = (float) location.getLatitude();
             lng = (float) location.getLongitude();
         }
 
+        // Test: Distance between two points
+        /*
+        Location location1 =new Location("locationA");
+        location1.setLatitude(54.98371);
+        location1.setLongitude(25.777924);
+        Location location2=new Location("locationA");
+        location2.setLatitude(54.984543);
+        location2.setLongitude(25.777504);
+        double distance = location1.distanceTo(location2);
+        Log.i("Distance", "Atstumas tarp tasku" + distance);
+        */
+
+        float[] distance = new float[1];
+        Location.distanceBetween(54.98371, 25.777924, 54.984543, 25.777504, distance);
+        Log.i("Distance", "Atstumas tarp tasku" + distance[0]);
+        /*
+        double distance = meterDistanceBetweenPoints(54.984543, 25.777504,54.990257, 25.779566 );
+        Log.i("Distance", "Atstumas tarp tasku" + distance);
+        */
+    }
+    private double meterDistanceBetweenPoints(double lat_a, double lng_a, double lat_b, double lng_b) {
+        float pk = (float) (180.f/Math.PI);
+
+        double a1 = lat_a / pk;
+        double a2 = lng_a / pk;
+        double b1 = lat_b / pk;
+        double b2 = lng_b / pk;
+
+        double t1 = Math.cos(a1) * Math.cos(a2) * Math.cos(b1) * Math.cos(b2);
+        double t2 = Math.cos(a1) * Math.sin(a2) * Math.cos(b1) * Math.sin(b2);
+        double t3 = Math.sin(a1) * Math.sin(b1);
+        double tt = Math.acos(t1 + t2 + t3);
+
+        return 6366000 * tt;
     }
 
     @Override
@@ -689,7 +734,7 @@ public class MainActivity1 extends Activity
 
     // Current state of the game:
     int mSecondsLeft = -1; // how long until the game ends (seconds)
-    final static int GAME_DURATION = 20; // game duration, seconds.
+    final static int GAME_DURATION = 45; // game duration, seconds.
     int mScore = 0; // user's current score
 
     // Reset game variables in preparation for a new game.
@@ -759,6 +804,9 @@ public class MainActivity1 extends Activity
     // from the network.
     Map<String, Integer> mParticipantScore = new HashMap<String, Integer>();
 
+    // Coordinte of participants
+    Map<String, Integer> mParticipantCoord = new HashMap<String, Integer>();
+
     // Participants who sent us their final score.
     Set<String> mFinishedParticipants = new HashSet<String>();
 
@@ -778,6 +826,37 @@ public class MainActivity1 extends Activity
             // score update.
             int existingScore = mParticipantScore.containsKey(sender) ? mParticipantScore.get(sender) : 0;
             int thisScore = (int) buf[1];
+
+            //TO DO: more than one player
+            // Get parcipiant coordinate (lattitude) from buffer
+            byte [] temp = new byte[4];
+            for (int i = 2; i <  buf.length; i++) {
+                if(i == 6){
+                    break;
+                }
+                temp[i - 2] = buf[i];
+            }
+
+            mOppnentCoord[0] = toFloat(temp); // Latittude.
+
+            // Get parcipiant coordinate (longitude) from buffer
+            byte [] temp2 = new byte[4];
+            for (int i = 6; i <  buf.length; i++) {
+                if(i == 10){
+                    break;
+                }
+                temp2[i - 6] = buf[i];
+            }
+
+            //Log.i("Float", "float" + mOppnentCoord[1]);
+            mOppnentCoord[1] = toFloat(temp2); // Longitude
+
+            // Canculate distance between players.
+            Location location2 = new Location("locationB");
+            location2.setLatitude(mOppnentCoord[0]);
+            location2.setLongitude(mOppnentCoord[1]);
+            mDistance = location.distanceTo(location2);
+
             if (thisScore > existingScore) {
                 // this check is necessary because packets may arrive out of
                 // order, so we
@@ -788,6 +867,7 @@ public class MainActivity1 extends Activity
                 // we'd have to add a "serial number" to the packet.
                 mParticipantScore.put(sender, thisScore);
             }
+
 
             // update the scores on the screen
             updatePeerScoresDisplay();
@@ -812,6 +892,12 @@ public class MainActivity1 extends Activity
         }
     }
 
+    public static float toFloat(byte[] bytes) {
+        float f = ByteBuffer.wrap(bytes).getFloat();
+        f = (float)((int)(f *1000000f ))/1000000f;
+        return f;
+    }
+
     // Broadcast my score to everybody else.
     void broadcastScore(boolean finalScore) {
         if (!mMultiplayer)
@@ -822,6 +908,20 @@ public class MainActivity1 extends Activity
 
         // Second byte is the score.
         mMsgBuf[1] = (byte) mScore;
+
+        // Add paricipiant coordinate (lattitude) to buffer.
+        byte[] tempBytes = new byte[4];
+        ByteBuffer.wrap(tempBytes).putFloat(lat);
+        for (int i = 0; i <  tempBytes.length; i++){
+                mMsgBuf[i + 2] = tempBytes[i];
+        }
+
+        // Add paricipiant coordinate (longitude) to buffer.
+        byte[] tempBytes2 = new byte[4];
+        ByteBuffer.wrap(tempBytes).putFloat(lng);
+        for (int i = 0; i <  tempBytes.length; i++){
+            mMsgBuf[i + 6] = tempBytes[i];
+        }
 
         // Send to every other participant.
         for (Participant p : mParticipants) {
@@ -911,6 +1011,28 @@ public class MainActivity1 extends Activity
         };
         int i = 0;
 
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        /*
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        location = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (location != null) {
+            lat = (float) location.getLatitude();
+            lng = (float) location.getLongitude();
+        }
+        */
+
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
         if (mRoomId != null) {
             for (Participant p : mParticipants) {
                 String pid = p.getParticipantId();
@@ -921,8 +1043,9 @@ public class MainActivity1 extends Activity
                 int pl = 2;
                 int score = mParticipantScore.containsKey(pid) ? mParticipantScore.get(pid) : 0;
                 ((TextView) findViewById(arr[i])).setText(formatScore(score) + " - " + p.getDisplayName() +
-                "\nlat - " + lat + "\nlng - " + lng);
+                "\nlat - " + lat + "\nlng - " + lng + "\n Atstumas" + mDistance + "\n Opnento koordinates" + mOppnentCoord[0] + " " + mOppnentCoord[1]);
                 ++i;
+
             }
         }
 
@@ -954,7 +1077,7 @@ public class MainActivity1 extends Activity
         lat = (float) location.getLatitude();
         lng = (float) location.getLongitude();
         Log.d(TAG, "Kordinates: " +  lat + "," + lng);
-        Toast.makeText(this, "Kordinates" + lat, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Kordinates - " + lat + " , " + lng, Toast.LENGTH_LONG).show();
     }
 }
 
