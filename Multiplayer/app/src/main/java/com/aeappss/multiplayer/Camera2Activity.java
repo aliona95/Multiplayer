@@ -92,8 +92,9 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
     private Button throwingButton;
 
     private long lastUpdate = 0;
-    private float last_x = -5, last_y = 0, last_z = 0;
+    private float last_x = 0, last_y = 0, last_z = 0;
     private static final int SHAKE_THRESHOLD = 600;
+    private boolean pressedThrow = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,11 +116,12 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
         throwingButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 firstBar.setVisibility(View.VISIBLE);
-                firstBar.setMax(20);
-                //firstBar.setProgress(0);
+                firstBar.setMax(35);
+                firstBar.setProgress(0);
                 //firstBar.setProgress(3);
                 throwingButton.setVisibility(View.INVISIBLE);
                 textViewThrowing.setVisibility(View.INVISIBLE);
+                pressedThrow = true;
             }
         });
 
@@ -294,6 +296,8 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
     long allThrowingTime;
     float accelerometerDistance;
     float accelerometerSpeed;
+    boolean throwUp = false;
+    boolean wasUp = false;
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor mySensor = sensorEvent.sensor;
@@ -303,46 +307,89 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
 
+            //Log.i("PASUKIMAS ", "IESKOMA " + String.valueOf(x));
+
             long curTime = System.currentTimeMillis();
 
-            if((curTime/1000 - lastUpdate/1000 > 0.001) && last_x > x && (last_x <= 0 && x <= 0 && last_x - x > 0.5) && !doneDown){ // atgal
-                    Log.i("PASUKIMAS ", "IESKOMA " + String.valueOf(x));
+            /*////////////////////// 2 budas
+            if(!was && last_x == 0 && last_x < (x + 5) && pressedThrow && !throwUp && !(last_x > x && (last_x <= 0 && x <= 0 && last_x - x > 0.5) && !doneDown && pressedThrow && !throwUp)){
+                throwUp = true;
+                wasUp = true;
+            }
+            if(!was && throwUp && last_x < x && pressedThrow){
+                last_x = x;
+            }else if(!was && throwUp && last_x > (x + 2) && pressedThrow && x > -5){// metimas ivyko
+                accelerometerSpeed = (abs(x) + abs(y) + abs(z));  // ar nereikejo last_x vetoj x?
+                Toast.makeText(this, "GREITIS111 " + accelerometerSpeed, Toast.LENGTH_SHORT).show();
+                throwUp = false;
+                last_x = 0;
+                pressedThrow = false;
+                firstBar.setVisibility(View.INVISIBLE);
+                //firstBar.setMax(35);
+                throwingButton.setVisibility(View.VISIBLE);
+                wasUp = false;
+            }*/
+
+
+
+            // 1 budas
+            if(/*(curTime/1000 - lastUpdate/1000 > 0.001) && */last_x > x && (last_x <= 0 && x <= 0 && last_x - x > 0.5) && !doneDown && pressedThrow && !throwUp && !wasUp){ // atgal
+                    //Log.i("PASUKIMAS ", "IESKOMA " + String.valueOf(x));
                     firstBar.setProgress(Math.abs(Math.round(Math.abs(x))));
                     lastUpdate = curTime;
                     was = true;
                     last_x = x;
+                    last_y = y;
+                    last_z = z;
             } // priesingu atveju jei padaugeja paklaida einant i kita puse, nustojama, issaugomi duomenys ir vykdoma i prieki
-            else if((curTime/1000 - lastUpdate/1000 > 0.001) && last_x < x && (last_x <= 0 && x <= 0 && abs(last_x) - abs(x) > 2) && !doneDown && was){   // laika iki 0.5 gal sumazint???
-                Log.i("PASUKIMAS ", "GAUTAS " + last_x);
+            else if(/*(curTime/1000 - lastUpdate/1000 > 0.001) && */last_x < x && (last_x <= 0 && x <= 0 && (abs(last_x) - abs(x) > 2) || abs(last_x) - abs(x) > 0.5 && (curTime/1000 - lastUpdate/1000 > 0.75)) && !doneDown && was && pressedThrow && !throwUp && !wasUp){   // laika iki 0.5 gal sumazint???
+                //Log.i("PASUKIMAS", "GREITIS kitas = " + (abs(x) + abs(y) + abs(z)) + "m/s^2");
+                //accelerometerSpeed = (abs(x) + abs(y) + abs(z));  // ar nereikejo last_x vetoj x ir kitu likusiu?
+                accelerometerSpeed = (abs(last_x) + abs(last_y) + abs(last_z));  // ar nereikejo last_x vetoj x ir kitu likusiu?
+                //Log.i("PASUKIMAS ", "GAUTAS " + last_x);
                 lastUpdate = curTime;
                 doneDown = true;
                 downX = last_x;
                 curTimeThrow = System.currentTimeMillis();   // nustatome laika, kai pasiekiame galines koord
             }
 
-            if((curTime/1000 - lastUpdate/1000 > 0.001) && doneDown && last_x < x && abs(last_x) - abs(x) > 0.5 && !doneUp){
-                Log.i("PASUKIMAS ", "IESKOMA KITO " + String.valueOf(x));
+            if(/*(curTime/1000 - lastUpdate/1000 > 0.001) && */doneDown && last_x < x && abs(last_x) - abs(x) > 0.5 && abs(last_x) - abs(x) < 2 && !doneUp && pressedThrow && !throwUp && !wasUp){
+                //Log.i("PASUKIMAS ", "IESKOMA KITO " + String.valueOf(x));
                 lastUpdate = curTime;
                 was1 = true;
                 last_x = x;
-            }else if((curTime/1000 - lastUpdate/1000 > 0.001) && abs(x) - abs(last_x) > 0.5 && !doneUp && was1){
-                Log.i("PASUKIMAS ", "GAUTAS KITO " + last_x);
+            }else if(/*(curTime/1000 - lastUpdate/1000 > 0.001) && */abs(x) - abs(last_x) > 5 && !doneUp && was1 && pressedThrow && !throwUp && !wasUp){
+                //Log.i("PASUKIMAS ", "GAUTAS KITO ");
                 lastUpdate = curTime;
                 doneUp = true;
                 upX = last_x;
                 allThrowingTime = System.currentTimeMillis() - curTimeThrow;
-                Log.i("PASUKIMAS ", "GAUTAS LAIKAS " + allThrowingTime/1000 + "s");
+                //Log.i("PASUKIMAS ", "GAUTAS LAIKAS " + allThrowingTime/1000 + "s");
+            }else if((curTime/1000 - lastUpdate/1000 > 0.75) && !doneUp && was1 && pressedThrow && !throwUp && !wasUp){ // laukiama 0.75 sek
+                //Log.i("PASUKIMAS ", "GAUTAS KITO ");
+                lastUpdate = curTime;
+                doneUp = true;
+                upX = last_x;
+                allThrowingTime = System.currentTimeMillis() - curTimeThrow;
+                //Log.i("PASUKIMAS ", "GAUTAS LAIKAS " + allThrowingTime/1000 + "s");
             }
 
-            if(doneDown && doneUp){
+            if(doneDown && doneUp && !wasUp){
                 accelerometerDistance = abs(downX) + abs(upX);
-                Log.i("PASUKIMAS ", "ATSTUMAS " + accelerometerDistance);
-                accelerometerSpeed = accelerometerDistance*(allThrowingTime/1000);
+                //Log.i("PASUKIMAS ", "ATSTUMAS " + accelerometerDistance);
+                //accelerometerSpeed = accelerometerDistance*(allThrowingTime/1000);
                 Log.i("PASUKIMAS ", "GREITIS " + accelerometerSpeed + "m/s");
+                Toast.makeText(this, "GREITIS " + accelerometerSpeed, Toast.LENGTH_LONG).show();
+                pressedThrow = false;
+                doneDown = false;
+                doneUp = false;
+                firstBar.setVisibility(View.INVISIBLE);
+                //firstBar.setMax(35);
+                throwingButton.setVisibility(View.VISIBLE);
+                //textViewThrowing.setVisibility(View.VISIBLE);
+                //firstBar.setProgress(0);
+                last_x = 0;
             }
-
-
-
 
 
 

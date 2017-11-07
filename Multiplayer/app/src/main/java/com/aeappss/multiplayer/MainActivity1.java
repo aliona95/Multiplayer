@@ -1077,7 +1077,7 @@ public class MainActivity1 extends Activity
         lat = (float) location.getLatitude();
         lng = (float) location.getLongitude();
         Log.d(TAG, "Kordinates: " +  lat + "," + lng);
-        Toast.makeText(this, "Kordinates - " + lat + " , " + lng, Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "Kordinates - " + lat + " , " + lng, Toast.LENGTH_LONG).show();
     }
 }
 
