@@ -125,8 +125,6 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
             }
         });
 
-
-
         //Toast.makeText(Camera2Activity.this, "Nėra duomenų", Toast.LENGTH_LONG).show();
 
         mTextureView = (TextureView) findViewById(R.id.textureView);
@@ -143,25 +141,6 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
 
             }
         });
-
-
-       /* View.OnClickListener onClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switch (view.getId()) {
-                    case R.id.action_map:
-                        Intent homeIntent = new Intent(Camera2Activity.this, MapsActivity.class);
-                        startActivity(homeIntent);
-                        //finish();
-                        Toast.makeText(getApplicationContext(), "TEXT", Toast.LENGTH_SHORT).show();
-                        break;
-                }
-            }
-        } ;
-
-        mapAction.setOnClickListener(onClickListener);
-*/
-
     }
 
     static class CompareSizesByArea implements Comparator<Size> {
@@ -254,7 +233,6 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
         }
 
         //senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-
     }
 
     private void openCamera() {
@@ -310,27 +288,6 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
             //Log.i("PASUKIMAS ", "IESKOMA " + String.valueOf(x));
 
             long curTime = System.currentTimeMillis();
-
-            /*////////////////////// 2 budas
-            if(!was && last_x == 0 && last_x < (x + 5) && pressedThrow && !throwUp && !(last_x > x && (last_x <= 0 && x <= 0 && last_x - x > 0.5) && !doneDown && pressedThrow && !throwUp)){
-                throwUp = true;
-                wasUp = true;
-            }
-            if(!was && throwUp && last_x < x && pressedThrow){
-                last_x = x;
-            }else if(!was && throwUp && last_x > (x + 2) && pressedThrow && x > -5){// metimas ivyko
-                accelerometerSpeed = (abs(x) + abs(y) + abs(z));  // ar nereikejo last_x vetoj x?
-                Toast.makeText(this, "GREITIS111 " + accelerometerSpeed, Toast.LENGTH_SHORT).show();
-                throwUp = false;
-                last_x = 0;
-                pressedThrow = false;
-                firstBar.setVisibility(View.INVISIBLE);
-                //firstBar.setMax(35);
-                throwingButton.setVisibility(View.VISIBLE);
-                wasUp = false;
-            }*/
-
-
 
             // 1 budas
             if(/*(curTime/1000 - lastUpdate/1000 > 0.001) && */last_x > x && (last_x <= 0 && x <= 0 && last_x - x > 0.5) && !doneDown && pressedThrow && !throwUp && !wasUp){ // atgal
@@ -390,74 +347,6 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
                 //firstBar.setProgress(0);
                 last_x = 0;
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            /*if ((curTime - lastUpdate) > 200) {
-                long diffTime = (curTime - lastUpdate);
-                Log.i("TAG", "LAIKAAAAAAS " + diffTime);
-
-                lastUpdate = curTime;
-
-                float speed = Math.abs(x + y + z - last_x - last_y - last_z);/// diffTime * 10000/2;
-                Log.i("TAG", "SPEED " + speed);
-                if (speed > SHAKE_THRESHOLD) {
-                    Log.i("RESOLUTION", String.valueOf(mySensor.getResolution()) + " DELAY " + mySensor.getMaximumRange());
-                    Toast toast = Toast.makeText(getApplicationContext(), "Įrenginys pajudintas. Greitis: " + speed, Toast.LENGTH_SHORT);
-                    toast.show();
-                }
-
-                last_x = x;
-                last_y = y;
-                last_z = z;
-
-
-                if (last_x < 0){
-                    firstBar.setProgress(Math.abs(Math.round(last_x)));
-                    if (maxThrowingForce < Math.abs(Math.round(last_x))){
-                        maxThrowingForce = Math.abs(Math.round(last_x));
-                        textViewThrowing.setVisibility(View.INVISIBLE);
-                    } else if (maxThrowingForce - Math.abs(Math.round(last_x)) > 2){
-                        // METYMAS, kelias sekundes pastabdyti, tada isjungti, ir kad vel galima butu metyti
-                        maxThrowingForce = 0;
-                        //textViewThrowing.setVisibility(View.VISIBLE);
-
-                        if(throwingButton.getVisibility() == View.INVISIBLE) {
-                            textViewThrowing.setVisibility(View.VISIBLE);
-                        }
-
-                        firstBar.setVisibility(View.INVISIBLE);
-                        //firstBar.setProgress(0);
-                        throwingButton.setVisibility(View.VISIBLE);
-
-                    }
-                }
-            }*/
         }
     }
 

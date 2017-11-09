@@ -2,38 +2,40 @@ package com.aeappss.multiplayer;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Criteria;
+import android.graphics.SurfaceTexture;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
+import android.os.HandlerThread;
+import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.util.Size;
+import android.view.Surface;
+import android.view.TextureView;
 import android.view.View;
-import android.widget.Button;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.math.RoundingMode;
 import java.nio.ByteBuffer;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,13 +58,11 @@ import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.example.games.basegameutils.BaseGameUtils;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,28 +86,11 @@ import java.util.Set;
  *
  * @author Bruno Oliveira (btco), 2013-04-26
  */
+@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class MainActivity1 extends Activity
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener, RealTimeMessageReceivedListener,
-        RoomStatusUpdateListener, RoomUpdateListener, OnInvitationReceivedListener, LocationListener {
-    /*Intent mainIntent;
-    Button button;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main1);
-
-        button = (Button) findViewById(R.id.temp1);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Log.i("AAA", "AAA");
-                mainIntent = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(mainIntent);
-                //finish();
-            }
-        });
-
-    }*/
+        RoomStatusUpdateListener, RoomUpdateListener, OnInvitationReceivedListener, LocationListener/*, SensorEventListener */{
 
     //
     //API INTEGRATION SECTION. This section contains the code that integrates
@@ -165,7 +148,7 @@ public class MainActivity1 extends Activity
 
     // Distance between two players TO DO: HASH MAP.
     float mDistance = -1; //for check -1
-    float [] mOppnentCoord = new float[2];
+    float [] mOpponentCoord = new float[2];
     LocationRequest mLocationRequest;
 
     @Override
@@ -188,34 +171,12 @@ public class MainActivity1 extends Activity
             findViewById(id).setOnClickListener(this);
         }
 
-        // Get the location manager
-        /*
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        // Define the criteria how to select the locatioin provider -> use
-        // default
-        Criteria criteria = new Criteria();
-        provider = locationManager.getBestProvider(criteria, false);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        Location location = locationManager.getLastKnownLocation(provider);
 
-        // Initialize the location fields
-        if (location != null) {
-            System.out.println("Provider " + provider + " has been selected.");
-            onLocationChanged(location);
-            Log.i("Rasta", "Find Location");
-        } else {
-            Log.i("Nerasta", "Can't find location");
-        }
-        */
+
+
+
+        mTextureView = (TextureView) findViewById(R.id.textureView);
+        mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
     }
 
 
@@ -839,7 +800,7 @@ public class MainActivity1 extends Activity
                 temp[i - 2] = buf[i];
             }
 
-            mOppnentCoord[0] = toFloat(temp); // Latittude.
+            mOpponentCoord[0] = toFloat(temp); // Latittude.
 
             // Get parcipiant coordinate (longitude) from buffer
             byte [] temp2 = new byte[4];
@@ -850,13 +811,13 @@ public class MainActivity1 extends Activity
                 temp2[i - 6] = buf[i];
             }
 
-            //Log.i("Float", "float" + mOppnentCoord[1]);
-            mOppnentCoord[1] = toFloat(temp2); // Longitude
+            //Log.i("Float", "float" + mOpponentCoord[1]);
+            mOpponentCoord[1] = toFloat(temp2); // Longitude
 
             // Canculate distance between players.
             Location location2 = new Location("locationB");
-            location2.setLatitude(mOppnentCoord[0]);
-            location2.setLongitude(mOppnentCoord[1]);
+            location2.setLatitude(mOpponentCoord[0]);
+            location2.setLongitude(mOpponentCoord[1]);
             mDistance = location.distanceTo(location2);
 
             if (thisScore > existingScore) {
@@ -1045,7 +1006,7 @@ public class MainActivity1 extends Activity
                 int pl = 2;
                 int score = mParticipantScore.containsKey(pid) ? mParticipantScore.get(pid) : 0;
                 ((TextView) findViewById(arr[i])).setText(formatScore(score) + " - " + p.getDisplayName() +
-                "\nlat - " + lat + "\nlng - " + lng + "\n Atstumas" + mDistance + "\n Opnento koordinates" + mOppnentCoord[0] + " " + mOppnentCoord[1]);
+                "\n lat - " + lat + "\n lng - " + lng + "\n Atstumas" + mDistance + "\n Oponento koordinates" + mOpponentCoord[0] + " " + mOpponentCoord[1]);
                 ++i;
 
             }
@@ -1083,6 +1044,137 @@ public class MainActivity1 extends Activity
         Log.i("Paklaida", " " + location.getAccuracy());
         Toast.makeText(this, "ACCURANCY " + location.getAccuracy(), Toast.LENGTH_LONG).show();
 
+    }
+
+
+
+    private CameraDevice mCameraDevice = null;
+    private CaptureRequest.Builder mCaptureRequestBuilder = null;
+    private CameraCaptureSession mCameraCaptureSession  = null;
+    private TextureView mTextureView = null;
+    private Size mPreviewSize = null;
+    private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
+        @Override
+        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+
+        }
+        @Override
+        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+
+        }
+        @Override
+        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+            return false;
+        }
+        @Override
+        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+            openCamera();
+        }
+    };
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void openCamera() {
+        CameraManager manager = (CameraManager) getSystemService(CAMERA_SERVICE);
+        try{
+            String cameraId = manager.getCameraIdList()[0];
+            CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
+            StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+            mPreviewSize = map.getOutputSizes(SurfaceTexture.class) [0];
+            manager.openCamera(cameraId, mStateCallback, null);
+        } catch(CameraAccessException e) {
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
+        @Override
+        public void onOpened(CameraDevice camera) {
+            mCameraDevice = camera;
+            SurfaceTexture texture = mTextureView.getSurfaceTexture();
+            if (texture == null) {
+                return;
+            }
+            texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+            Surface surface = new Surface(texture);
+            try {
+                mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            } catch (CameraAccessException e){
+                e.printStackTrace();
+            }
+            mCaptureRequestBuilder.addTarget(surface);
+            try {
+                mCameraDevice.createCaptureSession(Arrays.asList(surface), mPreviewStateCallback, null);
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        @Override
+        public void onError(CameraDevice camera, int error) {}
+        @Override
+        public void onDisconnected(CameraDevice camera) {
+
+        }
+    };
+
+    private void startPreview(CameraCaptureSession session) {
+        mCameraCaptureSession = session;
+        mCaptureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+        HandlerThread backgroundThread = new HandlerThread("CameraPreview");
+        backgroundThread.start();
+        Handler backgroundHandler = new Handler(backgroundThread. getLooper());
+        try {
+            mCameraCaptureSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, backgroundHandler);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private CameraCaptureSession.StateCallback mPreviewStateCallback = new CameraCaptureSession.StateCallback() {
+        @Override
+        public void onConfigured(CameraCaptureSession session) {
+            startPreview(session);
+        }
+        @Override
+        public void onConfigureFailed(CameraCaptureSession session) {
+
+        }
+    };
+
+   /* @Override
+    public void onSensorChanged(SensorEvent event) {
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }*/
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mCameraDevice != null) {
+            mCameraDevice.close();
+            mCameraDevice = null;
+        }
+
+        //senSensorManager.unregisterListener(this);
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mTextureView.isAvailable()) {
+            openCamera();
+        } else {
+            mTextureView.setSurfaceTextureListener(
+                    mSurfaceTextureListener);
+        }
+
+        //senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 }
 

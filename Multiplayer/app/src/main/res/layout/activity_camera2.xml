@@ -97,20 +97,6 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/radar" />
 
-    <!--
-
-    <ProgressBar
-        android:id="@+id/progressbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_margin="10dp"
-        android:layout_below="@id/firstBar"
-        android:background="@color/colorPrimary"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal" />
-
-     -->
-
     <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/multiple_actions"
         android:layout_width="wrap_content"

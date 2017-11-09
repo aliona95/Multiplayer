@@ -57,23 +57,78 @@
     <!-- GAMEPLAY SCREEN -->
     <LinearLayout android:id="@+id/screen_game" style="@style/LLScreen"
         android:background="@color/colorPrimary">
-        <TextView android:id="@+id/instructions"
-            style="@style/Instructions" android:text="@string/instructions" />
-        <TextView android:id="@+id/my_score" style="@style/ScoreDisplay" />
-        <Button android:id="@+id/button_click_me"
-            style="@style/GameButton"
-            android:text="@string/click_me"
-            android:layout_marginBottom="20dp" />
-        <TextView android:id="@+id/countdown" style="@style/FigureLabel" />
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextureView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/textureView"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                tools:ignore="ObsoleteLayoutParam">
+            </TextureView>
 
-        <LinearLayout style="@style/ScoresBox"
-            android:background="@color/colorPrimaryDark">
-            <TextView android:id="@+id/score0" style="@style/ScoreText" />
-            <TextView android:id="@+id/score1" style="@style/ScoreText" />
-            <TextView android:id="@+id/score2" style="@style/ScoreText" />
-            <TextView android:id="@+id/score3" style="@style/ScoreText" />
-        </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/instructions"
+                android:text="@string/instructions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="100dp"
+                android:layout_marginTop="300dp"
+                android:padding="250dp"/> <!-- style="@style/Instructions" ar reikia PADDING???-->
+            <TextView
+                android:id="@+id/my_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="100dp"
+                android:layout_marginTop="300dp"
+                android:padding="300dp"/> <!-- style="@style/ScoreDisplay" ar reikia PADDING?????-->
+            <Button
+
+                android:id="@+id/button_click_me"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
+                android:textColor="@color/colorAccent"
+
+                android:text="@string/click_me"
+                android:layout_marginBottom="100dp"
+                android:layout_marginLeft="150dp"
+                android:layout_marginTop="485dp"/> <!--style="@style/GameButton"-->
+            <TextView
+                android:id="@+id/countdown"
+                android:layout_height="150dp"
+                android:layout_width="150dp"
+                android:layout_marginTop="50dp"/> <!-- style="@style/FigureLabel" -->
+
+            <TextView
+                android:id="@+id/score0"
+                android:layout_height="150dp"
+                android:layout_width="150dp"
+                android:layout_marginTop="100dp"/>
+            <TextView
+                android:id="@+id/score1"
+                android:layout_height="150dp"
+                android:layout_width="150dp"
+                android:layout_marginTop="150dp"/>
+
+            <TextView
+                android:id="@+id/score2"
+                android:layout_height="150dp"
+                android:layout_width="150dp" />
+
+            <TextView
+                android:id="@+id/score3"
+                android:layout_height="150dp"
+                android:layout_width="150dp"
+                android:layout_marginLeft="100dp"
+                android:layout_marginTop="300dp"/>
+
+        </FrameLayout>
     </LinearLayout>
-
 
 </FrameLayout>
