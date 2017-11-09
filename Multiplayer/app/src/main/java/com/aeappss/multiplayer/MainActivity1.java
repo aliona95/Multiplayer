@@ -505,9 +505,9 @@ public class MainActivity1 extends Activity
 
 
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10);
-        mLocationRequest.setFastestInterval(10);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(10000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
@@ -521,7 +521,9 @@ public class MainActivity1 extends Activity
             lng = (float) location.getLongitude();
         }
 
-        // Test: Distance between two points
+        Log.i("Paklaida", " " + location.getAccuracy());
+        Toast.makeText(this, "ACCURANCY onConnected " + location.getAccuracy(), Toast.LENGTH_LONG).show();
+        // Test: Daistance between two points
         /*
         Location location1 =new Location("locationA");
         location1.setLatitude(54.98371);
@@ -1078,6 +1080,9 @@ public class MainActivity1 extends Activity
         lng = (float) location.getLongitude();
         Log.d(TAG, "Kordinates: " +  lat + "," + lng);
         //Toast.makeText(this, "Kordinates - " + lat + " , " + lng, Toast.LENGTH_LONG).show();
+        Log.i("Paklaida", " " + location.getAccuracy());
+        Toast.makeText(this, "ACCURANCY " + location.getAccuracy(), Toast.LENGTH_LONG).show();
+
     }
 }
 
