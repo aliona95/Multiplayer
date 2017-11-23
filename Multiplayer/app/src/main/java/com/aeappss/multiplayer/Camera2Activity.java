@@ -1,6 +1,8 @@
 package com.aeappss.multiplayer;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -93,8 +95,11 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
 
     private long lastUpdate = 0;
     private float last_x = 0, last_y = 0, last_z = 0;
-    private static final int SHAKE_THRESHOLD = 600;
     private boolean pressedThrow = false;
+
+    private Bitmap[] mSpots, mBlips;
+    private Bitmap mRadar;
+    Paint mPaint = new Paint();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,8 +110,6 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
-        //final RelativeLayout rl = (RelativeLayout)findViewById(R.id.RelativeLayout02);
-        //rl.setBackgroundColor(Color.rgb(190, 238, 233));
 
         firstBar = (ProgressBar)findViewById(R.id.firstBar);
 
@@ -124,8 +127,6 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
                 pressedThrow = true;
             }
         });
-
-        //Toast.makeText(Camera2Activity.this, "Nėra duomenų", Toast.LENGTH_LONG).show();
 
         mTextureView = (TextureView) findViewById(R.id.textureView);
         mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
@@ -263,6 +264,8 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
         }
     }
 
+    ///// ACCELEROMETER SPEED
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     float maxDown = 0;
     boolean doneDown = false;
     boolean doneUp = false;
@@ -279,19 +282,15 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor mySensor = sensorEvent.sensor;
-        //final RelativeLayout rl = (RelativeLayout)findViewById(R.id.RelativeLayout02);
         if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             float x = sensorEvent.values[0];
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
 
-            //Log.i("PASUKIMAS ", "IESKOMA " + String.valueOf(x));
-
             long curTime = System.currentTimeMillis();
 
             // 1 budas
-            if(/*(curTime/1000 - lastUpdate/1000 > 0.001) && */last_x > x && (last_x <= 0 && x <= 0 && last_x - x > 0.5) && !doneDown && pressedThrow && !throwUp && !wasUp){ // atgal
-                    //Log.i("PASUKIMAS ", "IESKOMA " + String.valueOf(x));
+            if(last_x > x && (last_x <= 0 && x <= 0 && last_x - x > 0.5) && !doneDown && pressedThrow && !throwUp && !wasUp){ // atgal
                     firstBar.setProgress(Math.abs(Math.round(Math.abs(x))));
                     lastUpdate = curTime;
                     was = true;
@@ -299,61 +298,51 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
                     last_y = y;
                     last_z = z;
             } // priesingu atveju jei padaugeja paklaida einant i kita puse, nustojama, issaugomi duomenys ir vykdoma i prieki
-            else if(/*(curTime/1000 - lastUpdate/1000 > 0.001) && */last_x < x && (last_x <= 0 && x <= 0 && (abs(last_x) - abs(x) > 2) || abs(last_x) - abs(x) > 0.5 && (curTime/1000 - lastUpdate/1000 > 0.75)) && !doneDown && was && pressedThrow && !throwUp && !wasUp){   // laika iki 0.5 gal sumazint???
-                //Log.i("PASUKIMAS", "GREITIS kitas = " + (abs(x) + abs(y) + abs(z)) + "m/s^2");
-                //accelerometerSpeed = (abs(x) + abs(y) + abs(z));  // ar nereikejo last_x vetoj x ir kitu likusiu?
+            else if(last_x < x && (last_x <= 0 && x <= 0 && (abs(last_x) - abs(x) > 2) || abs(last_x) - abs(x) > 0.5 && (curTime/1000 - lastUpdate/1000 > 0.75)) && !doneDown && was && pressedThrow && !throwUp && !wasUp){   // laika iki 0.5 gal sumazint???
                 accelerometerSpeed = (abs(last_x) + abs(last_y) + abs(last_z));  // ar nereikejo last_x vetoj x ir kitu likusiu?
-                //Log.i("PASUKIMAS ", "GAUTAS " + last_x);
                 lastUpdate = curTime;
                 doneDown = true;
                 downX = last_x;
                 curTimeThrow = System.currentTimeMillis();   // nustatome laika, kai pasiekiame galines koord
             }
 
-            if(/*(curTime/1000 - lastUpdate/1000 > 0.001) && */doneDown && last_x < x && abs(last_x) - abs(x) > 0.5 && abs(last_x) - abs(x) < 2 && !doneUp && pressedThrow && !throwUp && !wasUp){
-                //Log.i("PASUKIMAS ", "IESKOMA KITO " + String.valueOf(x));
+            if(doneDown && last_x < x && abs(last_x) - abs(x) > 0.5 && abs(last_x) - abs(x) < 2 && !doneUp && pressedThrow && !throwUp && !wasUp){
                 lastUpdate = curTime;
                 was1 = true;
                 last_x = x;
-            }else if(/*(curTime/1000 - lastUpdate/1000 > 0.001) && */abs(x) - abs(last_x) > 5 && !doneUp && was1 && pressedThrow && !throwUp && !wasUp){
-                //Log.i("PASUKIMAS ", "GAUTAS KITO ");
+            }else if(abs(x) - abs(last_x) > 5 && !doneUp && was1 && pressedThrow && !throwUp && !wasUp){
                 lastUpdate = curTime;
                 doneUp = true;
                 upX = last_x;
                 allThrowingTime = System.currentTimeMillis() - curTimeThrow;
-                //Log.i("PASUKIMAS ", "GAUTAS LAIKAS " + allThrowingTime/1000 + "s");
             }else if((curTime/1000 - lastUpdate/1000 > 0.75) && !doneUp && was1 && pressedThrow && !throwUp && !wasUp){ // laukiama 0.75 sek
-                //Log.i("PASUKIMAS ", "GAUTAS KITO ");
                 lastUpdate = curTime;
                 doneUp = true;
                 upX = last_x;
                 allThrowingTime = System.currentTimeMillis() - curTimeThrow;
-                //Log.i("PASUKIMAS ", "GAUTAS LAIKAS " + allThrowingTime/1000 + "s");
             }
 
             if(doneDown && doneUp && !wasUp){
                 accelerometerDistance = abs(downX) + abs(upX);
-                //Log.i("PASUKIMAS ", "ATSTUMAS " + accelerometerDistance);
-                //accelerometerSpeed = accelerometerDistance*(allThrowingTime/1000);
                 Log.i("PASUKIMAS ", "GREITIS " + accelerometerSpeed + "m/s");
                 Toast.makeText(this, "GREITIS " + accelerometerSpeed, Toast.LENGTH_LONG).show();
                 pressedThrow = false;
                 doneDown = false;
                 doneUp = false;
                 firstBar.setVisibility(View.INVISIBLE);
-                //firstBar.setMax(35);
                 throwingButton.setVisibility(View.VISIBLE);
-                //textViewThrowing.setVisibility(View.VISIBLE);
-                //firstBar.setProgress(0);
                 last_x = 0;
             }
         }
     }
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 
     }
+
+
+
 }
 
 

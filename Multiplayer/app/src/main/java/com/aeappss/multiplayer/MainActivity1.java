@@ -39,6 +39,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
@@ -90,7 +91,7 @@ import java.util.Set;
 public class MainActivity1 extends Activity
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener, RealTimeMessageReceivedListener,
-        RoomStatusUpdateListener, RoomUpdateListener, OnInvitationReceivedListener, LocationListener/*, SensorEventListener */{
+        RoomStatusUpdateListener, RoomUpdateListener, OnInvitationReceivedListener, LocationListener{
 
     //
     //API INTEGRATION SECTION. This section contains the code that integrates
@@ -99,8 +100,8 @@ public class MainActivity1 extends Activity
 
     private LocationManager locationManager;
     private String provider;
-    private float lat;
-    private float lng;
+    private double lat;
+    private double lng;
 
     final static String TAG = "ButtonClicker2000";
 
@@ -143,19 +144,19 @@ public class MainActivity1 extends Activity
     String mIncomingInvitationId = null;
 
     // Message buffer for sending messages
-    byte[] mMsgBuf = new byte[10];
+    byte[] mMsgBuf = new byte[18];
     private Location location;
 
     // Distance between two players TO DO: HASH MAP.
     float mDistance = -1; //for check -1
-    float [] mOpponentCoord = new float[2];
+    double [] mOpponentCoord = new double[2];
     LocationRequest mLocationRequest;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main1);
-        Log.i("LOGAS", "AS CIA");
+        //Log.i("LOGAS", "AS CIA");
 
         // Create the Google Api Client with access to Games
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -170,10 +171,6 @@ public class MainActivity1 extends Activity
         for (int id : CLICKABLES) {
             findViewById(id).setOnClickListener(this);
         }
-
-
-
-
 
         mTextureView = (TextureView) findViewById(R.id.textureView);
         mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
@@ -357,6 +354,7 @@ public class MainActivity1 extends Activity
             switchToMainScreen();
         }
         super.onStop();
+
     }
 
     // Activity just got to the foreground. We switch to the wait screen because we will now
@@ -466,9 +464,9 @@ public class MainActivity1 extends Activity
 
 
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(10000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        mLocationRequest.setInterval(1000);
+        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
@@ -483,7 +481,7 @@ public class MainActivity1 extends Activity
         }
 
         Log.i("Paklaida", " " + location.getAccuracy());
-        Toast.makeText(this, "ACCURANCY onConnected " + location.getAccuracy(), Toast.LENGTH_LONG).show();
+       // Toast.makeText(this, "ACCURANCY onConnected " + location.getAccuracy(), Toast.LENGTH_LONG).show();
         // Test: Daistance between two points
         /*
         Location location1 =new Location("locationA");
@@ -728,6 +726,18 @@ public class MainActivity1 extends Activity
                 h.postDelayed(this, 1000);
             }
         }, 1000);
+
+
+        final FloatingActionButton mapAction = (FloatingActionButton) findViewById(R.id.action_map);
+        mapAction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /// MAP INTENT
+                //Toast.makeText(Camera2Activity.this, "AS CIA", Toast.LENGTH_LONG).show();
+                Intent homeIntent = new Intent(getApplicationContext(), MapsActivity.class);
+                startActivity(homeIntent);
+            }
+        });
     }
 
     // Game tick -- update countdown, check if game ended.
@@ -792,33 +802,25 @@ public class MainActivity1 extends Activity
 
             //TO DO: more than one player
             // Get parcipiant coordinate (lattitude) from buffer
-            byte [] temp = new byte[4];
+            byte [] temp = new byte[8];
             for (int i = 2; i <  buf.length; i++) {
-                if(i == 6){
+                if(i == 10){
                     break;
                 }
                 temp[i - 2] = buf[i];
             }
 
-            mOpponentCoord[0] = toFloat(temp); // Latittude.
+            mOpponentCoord[0] = ByteBuffer.wrap(temp).getDouble();
 
             // Get parcipiant coordinate (longitude) from buffer
-            byte [] temp2 = new byte[4];
-            for (int i = 6; i <  buf.length; i++) {
-                if(i == 10){
-                    break;
-                }
-                temp2[i - 6] = buf[i];
+            byte [] temp2 = new byte[8];
+            for (int i = 10; i <  buf.length; i++) {
+                temp2[i - 10] = buf[i];
             }
 
             //Log.i("Float", "float" + mOpponentCoord[1]);
-            mOpponentCoord[1] = toFloat(temp2); // Longitude
 
-            // Canculate distance between players.
-            Location location2 = new Location("locationB");
-            location2.setLatitude(mOpponentCoord[0]);
-            location2.setLongitude(mOpponentCoord[1]);
-            mDistance = location.distanceTo(location2);
+            mOpponentCoord[1] = ByteBuffer.wrap(temp2).getDouble();// Longitude
 
             if (thisScore > existingScore) {
                 // this check is necessary because packets may arrive out of
@@ -873,18 +875,20 @@ public class MainActivity1 extends Activity
         mMsgBuf[1] = (byte) mScore;
 
         // Add paricipiant coordinate (lattitude) to buffer.
-        byte[] tempBytes = new byte[4];
-        ByteBuffer.wrap(tempBytes).putFloat(lat);
+
+        byte[] tempBytes = new byte[8];
+        ByteBuffer.wrap(tempBytes).putDouble(lat);
         for (int i = 0; i <  tempBytes.length; i++){
                 mMsgBuf[i + 2] = tempBytes[i];
         }
 
         // Add paricipiant coordinate (longitude) to buffer.
-        byte[] tempBytes2 = new byte[4];
-        ByteBuffer.wrap(tempBytes).putFloat(lng);
+        byte[] tempBytes2 = new byte[8];
+        ByteBuffer.wrap(tempBytes).putDouble(lng);
         for (int i = 0; i <  tempBytes.length; i++){
-            mMsgBuf[i + 6] = tempBytes[i];
+            mMsgBuf[i + 10] = tempBytes[i];
         }
+
 
         // Send to every other participant.
         for (Participant p : mParticipants) {
@@ -904,6 +908,7 @@ public class MainActivity1 extends Activity
                         p.getParticipantId());
             }
         }
+
     }
 
     //
@@ -1008,7 +1013,6 @@ public class MainActivity1 extends Activity
                 ((TextView) findViewById(arr[i])).setText(formatScore(score) + " - " + p.getDisplayName() +
                 "\n lat - " + lat + "\n lng - " + lng + "\n Atstumas" + mDistance + "\n Oponento koordinates" + mOpponentCoord[0] + " " + mOpponentCoord[1]);
                 ++i;
-
             }
         }
 
@@ -1037,12 +1041,18 @@ public class MainActivity1 extends Activity
 
     @Override
     public void onLocationChanged(Location location) {
-        lat = (float) location.getLatitude();
-        lng = (float) location.getLongitude();
-        Log.d(TAG, "Kordinates: " +  lat + "," + lng);
-        //Toast.makeText(this, "Kordinates - " + lat + " , " + lng, Toast.LENGTH_LONG).show();
-        Log.i("Paklaida", " " + location.getAccuracy());
-        Toast.makeText(this, "ACCURANCY " + location.getAccuracy(), Toast.LENGTH_LONG).show();
+        lat =  location.getLatitude();
+        lng =  location.getLongitude();
+        //Log.d(TAG, "Kordinates: " +  lat + "," + lng);
+        Toast.makeText(this, "Kordinates - " + lat + " , " + lng, Toast.LENGTH_LONG).show();
+        //Log.i("Paklaida", " " + location.getAccuracy());
+        //Toast.makeText(this, "ACCURANCY " + location.getAccuracy(), Toast.LENGTH_LONG).show();
+
+        // Canculate distance between players.
+        Location location2 = new Location("locationB");
+        location2.setLatitude(mOpponentCoord[0]);
+        location2.setLongitude(mOpponentCoord[1]);
+        mDistance = location.distanceTo(location2);
 
     }
 
@@ -1141,16 +1151,6 @@ public class MainActivity1 extends Activity
 
         }
     };
-
-   /* @Override
-    public void onSensorChanged(SensorEvent event) {
-
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }*/
 
     @Override
     protected void onPause() {

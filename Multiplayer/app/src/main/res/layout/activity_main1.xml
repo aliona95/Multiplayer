@@ -18,7 +18,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    xmlns:fab="http://schemas.android.com/apk/res-auto">
 
     <!-- MAIN SCREEN -->
     <LinearLayout android:id="@+id/screen_main" style="@style/LLScreen">
@@ -55,8 +56,7 @@
     </LinearLayout>
 
     <!-- GAMEPLAY SCREEN -->
-    <LinearLayout android:id="@+id/screen_game" style="@style/LLScreen"
-        android:background="@color/colorPrimary">
+    <LinearLayout android:id="@+id/screen_game" style="@style/LLScreen">
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
@@ -69,8 +69,6 @@
                 xmlns:android="http://schemas.android.com/apk/res/android"
                 tools:ignore="ObsoleteLayoutParam">
             </TextureView>
-
-
 
             <TextView
                 android:id="@+id/instructions"
@@ -87,8 +85,8 @@
                 android:layout_marginLeft="100dp"
                 android:layout_marginTop="300dp"
                 android:padding="300dp"/> <!-- style="@style/ScoreDisplay" ar reikia PADDING?????-->
-            <Button
 
+            <Button
                 android:id="@+id/button_click_me"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -98,7 +96,49 @@
                 android:text="@string/click_me"
                 android:layout_marginBottom="100dp"
                 android:layout_marginLeft="150dp"
-                android:layout_marginTop="485dp"/> <!--style="@style/GameButton"-->
+                android:layout_marginTop="285dp"/> <!--style="@style/GameButton"-->
+
+            <com.getbase.floatingactionbutton.FloatingActionsMenu
+                android:id="@+id/multiple_actions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                fab:fab_addButtonColorNormal="@color/green"
+                fab:fab_addButtonColorPressed="@color/green_pressed"
+                fab:fab_addButtonPlusIconColor="@color/yellow"
+                android:layout_marginBottom="24dp"
+                android:layout_marginLeft="275dp"
+                android:layout_marginTop="250dp"
+                tools:ignore="RtlHardcoded">
+
+                <com.getbase.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/action_map"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    fab:fab_icon="@drawable/ic_location_on_black_24dp"
+                    fab:fab_colorNormal="@color/yellow"
+                    fab:fab_size="normal"
+                    fab:fab_colorPressed="@color/yellow_pressed"/>
+
+                <com.getbase.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/action_chat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    fab:fab_icon="@drawable/ic_chat_bubble_black_24dp"
+                    fab:fab_colorNormal="@color/yellow"
+                    fab:fab_size="normal"
+                    fab:fab_colorPressed="@color/yellow_pressed"/>
+
+                <com.getbase.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/action_task"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    fab:fab_icon="@drawable/ic_assignment_black_24dp"
+                    fab:fab_colorNormal="@color/yellow"
+                    fab:fab_size="normal"
+                    fab:fab_colorPressed="@color/yellow_pressed"/>
+
+            </com.getbase.floatingactionbutton.FloatingActionsMenu>
+
             <TextView
                 android:id="@+id/countdown"
                 android:layout_height="150dp"
@@ -126,8 +166,7 @@
                 android:layout_height="150dp"
                 android:layout_width="150dp"
                 android:layout_marginLeft="100dp"
-                android:layout_marginTop="300dp"/>
-
+                android:layout_marginTop="300dp"/>-->
         </FrameLayout>
     </LinearLayout>
 
