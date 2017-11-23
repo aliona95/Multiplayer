@@ -345,14 +345,16 @@ public class MainActivity1 extends Activity
         Log.d(TAG, "**** got onStop");
 
         // if we're in a room, leave it.
+        /*
         leaveRoom();
 
         // stop trying to keep the screen on
         stopKeepingScreenOn();
-
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             switchToMainScreen();
         }
+        */
+
         super.onStop();
 
     }
@@ -727,15 +729,15 @@ public class MainActivity1 extends Activity
             }
         }, 1000);
 
-
         final FloatingActionButton mapAction = (FloatingActionButton) findViewById(R.id.action_map);
         mapAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 /// MAP INTENT
                 //Toast.makeText(Camera2Activity.this, "AS CIA", Toast.LENGTH_LONG).show();
-                Intent homeIntent = new Intent(getApplicationContext(), MapsActivity.class);
-                startActivity(homeIntent);
+                //switchToScreen(R.id.maps);
+                Intent mapsIntent = new Intent(getApplicationContext(), MapsActivity.class);
+                startActivity(mapsIntent);
             }
         });
     }
@@ -1159,15 +1161,16 @@ public class MainActivity1 extends Activity
             mCameraDevice.close();
             mCameraDevice = null;
         }
-
         //senSensorManager.unregisterListener(this);
 
     }
 
+    public static boolean mapOpen = false;
     @Override
     public void onResume() {
         super.onResume();
-        if (mTextureView.isAvailable()) {
+        if (mTextureView.isAvailable() || mapOpen) {
+            Log.i("OnResume", "OpenCamera");
             openCamera();
         } else {
             mTextureView.setSurfaceTextureListener(
