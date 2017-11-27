@@ -14,6 +14,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Icon;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.StrictMode;
 import android.support.v4.app.ActivityCompat;
@@ -70,6 +71,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        double[] mOpponentCoord = MainActivity1.mOpponentCoord;
+        Toast.makeText(this, "Lattitude " + mOpponentCoord[0], Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -148,14 +152,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mCurrLocationMarker.remove();
         }
 
+        //Place current location marker for all game session players
+        for(int i = 0; i < MainActivity1.players.size(); i++){
+            LatLng latLng = new LatLng(MainActivity1.players.get(i).getLatitude(),MainActivity1.players.get(i).getLongitude());
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.title(MainActivity1.players.get(i).getName());
+            ///add image to marker
+            mMap.addMarker(markerOptions).setIcon(BitmapDescriptorFactory.fromBitmap(getBitmapFromURL(MainActivity1.players.get(i).getImageUrl())));
+           // mMap.addMarker(markerOptions);
+        }
         //Place current location marker
+
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("Current Position");
+        //MarkerOptions markerOptions = new MarkerOptions();
+        //markerOptions.position(latLng);
+        ///markerOptions.title("Current Position");
         ///add image to marker
-         // aliona mMap.addMarker(markerOptions).setIcon(BitmapDescriptorFactory.fromBitmap(getBitmapFromURL("http://lh3.googleusercontent.com/5sKNBO62RREO3T5ZMc0JuP0EVj7eL24X_LMaQgMznTj6NEG2fvKm8eSE-i-bq2cHqyM=s96-ns"/*"https://qph.ec.quoracdn.net/main-thumb-t-120900-200-finxtvqbgfnwzxexbkalvblfjdezfced.jpeg"*/)));
-        mMap.addMarker(markerOptions).setIcon(BitmapDescriptorFactory.fromBitmap(getBitmapFromURL("http://lh3.googleusercontent.com/JuBxIlxgGFKxGgaPfGOG9-SE0G6vB82G7nK_LL4pS4eqPzabCjry-b5UzpHfl-KIsTjwKw=s96-ns"/*"https://qph.ec.quoracdn.net/main-thumb-t-120900-200-finxtvqbgfnwzxexbkalvblfjdezfced.jpeg"*/)));
+        //mMap.addMarker(markerOptions).setIcon(BitmapDescriptorFactory.fromBitmap(getBitmapFromURL("http://lh3.googleusercontent.com/JuBxIlxgGFKxGgaPfGOG9-SE0G6vB82G7nK_LL4pS4eqPzabCjry-b5UzpHfl-KIsTjwKw=s96-ns"/*"https://qph.ec.quoracdn.net/main-thumb-t-120900-200-finxtvqbgfnwzxexbkalvblfjdezfced.jpeg"*/)));
+
         //move map camera
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15));

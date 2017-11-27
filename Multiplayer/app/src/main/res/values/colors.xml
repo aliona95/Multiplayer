@@ -17,4 +17,6 @@
     <color name="blue_semi_transparent">#805677fc</color>
     <color name="blue_semi_transparent_pressed">#80738ffe</color>
     <color name="colorActionButton">#fffde7</color>
+    <color name="colorPrimaryLight">#5F71B5</color>
+    <color name="colorWindowBackground">#333</color>
 </resources>

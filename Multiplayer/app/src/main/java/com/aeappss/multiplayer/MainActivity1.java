@@ -62,6 +62,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.example.games.basegameutils.BaseGameUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -147,9 +148,11 @@ public class MainActivity1 extends Activity
     byte[] mMsgBuf = new byte[18];
     private Location location;
 
-    // Distance between two players TO DO: HASH MAP.
+    public static ArrayList<Player> players = new ArrayList<>();
+
+    //To DO add distance to Player class
     float mDistance = -1; //for check -1
-    double [] mOpponentCoord = new double[2];
+    public static double [] mOpponentCoord = new double[2];
     LocationRequest mLocationRequest;
 
     @Override
@@ -207,9 +210,10 @@ public class MainActivity1 extends Activity
 
             case R.id.button_camera_game:
                 Log.i("CAMERA", "clicked");
-                //switchToScreen(R.id.activity_main);
-                //setContentView(R.layout.activity_main);
+
                 Intent cameraIntent = new Intent(getApplicationContext(), Camera2Activity.class);
+                //Intent cameraIntent = new Intent(getApplicationContext(), LoadModel.class);
+
                 startActivity(cameraIntent);
                 finish();
                 break;
@@ -482,7 +486,7 @@ public class MainActivity1 extends Activity
             lng = (float) location.getLongitude();
         }
 
-        Log.i("Paklaida", " " + location.getAccuracy());
+        //Log.i("Paklaida", " " + location.getAccuracy());   //////////////////////////////////////////////////////////////////////
        // Toast.makeText(this, "ACCURANCY onConnected " + location.getAccuracy(), Toast.LENGTH_LONG).show();
         // Test: Daistance between two points
         /*
@@ -697,7 +701,7 @@ public class MainActivity1 extends Activity
 
     // Current state of the game:
     int mSecondsLeft = -1; // how long until the game ends (seconds)
-    final static int GAME_DURATION = 45; // game duration, seconds.
+    final static int GAME_DURATION = 36000; // game duration, seconds.
     int mScore = 0; // user's current score
 
     // Reset game variables in preparation for a new game.
@@ -708,11 +712,34 @@ public class MainActivity1 extends Activity
         mFinishedParticipants.clear();
     }
 
+    void initialisePlayersData(){
+        players.clear();
+            for(int i = 0; i < mParticipants.size(); i++){
+                Player player = new Player();
+                player.setName(mParticipants.get(i).getDisplayName());
+                player.setImageUrl(mParticipants.get(i).getIconImageUrl());
+                if(i != 0){
+                    player.setLatitude(mOpponentCoord[0]);
+                    player.setLongitude(mOpponentCoord[1]);
+                }else{
+                    player.setLatitude(lat);
+                    player.setLongitude(lng);
+                }
+                players.add(player);
+                /*
+                if (mParticipants.get(i).getParticipantId().equals(mMyId)&& (i == mParticipants.size() - 1)){
+                    Collections.reverse(players);
+                }
+                */
+            }
+    }
+
     // Start the gameplay phase of the game.
     void startGame(boolean multiplayer) {
         mMultiplayer = multiplayer;
         updateScoreDisplay();
         broadcastScore(false);
+
 
         switchToScreen(R.id.screen_game);
         findViewById(R.id.button_click_me).setVisibility(View.VISIBLE);
@@ -737,6 +764,7 @@ public class MainActivity1 extends Activity
                 //Toast.makeText(Camera2Activity.this, "AS CIA", Toast.LENGTH_LONG).show();
                 //switchToScreen(R.id.maps);
                 Intent mapsIntent = new Intent(getApplicationContext(), MapsActivity.class);
+                ///mapsIntent.putExtra("OpponentCordinate", mOpponentCoord);
                 startActivity(mapsIntent);
             }
         });
@@ -867,6 +895,8 @@ public class MainActivity1 extends Activity
 
     // Broadcast my score to everybody else.
     void broadcastScore(boolean finalScore) {
+        //Initialise player data
+        initialisePlayersData();
         if (!mMultiplayer)
             return; // playing single-player mode
 
@@ -1046,7 +1076,7 @@ public class MainActivity1 extends Activity
         lat =  location.getLatitude();
         lng =  location.getLongitude();
         //Log.d(TAG, "Kordinates: " +  lat + "," + lng);
-        Toast.makeText(this, "Kordinates - " + lat + " , " + lng, Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "Kordinates - " + lat + " , " + lng, Toast.LENGTH_LONG).show();
         //Log.i("Paklaida", " " + location.getAccuracy());
         //Toast.makeText(this, "ACCURANCY " + location.getAccuracy(), Toast.LENGTH_LONG).show();
 
@@ -1055,7 +1085,9 @@ public class MainActivity1 extends Activity
         location2.setLatitude(mOpponentCoord[0]);
         location2.setLongitude(mOpponentCoord[1]);
         mDistance = location.distanceTo(location2);
-
+        if(mParticipants!= null){
+            initialisePlayersData();
+        }
     }
 
 
