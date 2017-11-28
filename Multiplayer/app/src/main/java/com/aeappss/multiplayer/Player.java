@@ -11,6 +11,16 @@ public class Player {
     private double latitude;
     private double longitude;
 
+    public boolean isPataikyta() {
+        return pataikyta;
+    }
+
+    public void setPataikyta(boolean pataikyta) {
+        this.pataikyta = pataikyta;
+    }
+
+    private boolean pataikyta = false; // default
+
     public String getName() {
         return name;
     }

@@ -508,7 +508,8 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
+            double angle = bearing(54.9901267, 25.779396899999938, 54.9823894, 25.76502240000002);
+            Log.i("VAIZDAS ", "KAMPAS = " + String.valueOf(angle));
         }
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
@@ -523,6 +524,18 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
             openCamera();
         }
     };
+
+    // AZIMUTAS
+    protected static double bearing(double lat1, double lon1, double lat2, double lon2) {
+        double longDiff = Math.toRadians(lon2 - lon1);
+        double la1 = Math.toRadians(lat1);
+        double la2 = Math.toRadians(lat2);
+        double y = Math.sin(longDiff) * Math.cos(la2);
+        double x = Math.cos(la1) * Math.sin(la2) - Math.sin(la1) * Math.cos(la2) * Math.cos(longDiff);
+
+        double result = Math.toDegrees(Math.atan2(y, x));
+        return (result+360.0d)%360.0d;
+    }
 
     private CameraCaptureSession.StateCallback mPreviewStateCallback = new CameraCaptureSession.StateCallback() {
         @Override
@@ -698,16 +711,16 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
                 }
 
                 // PAKEISTI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                distanceBetweenMyOpponent = 100;  // atstumas turi irgi paklaida
+                distanceBetweenMyOpponent = -100;  // atstumas turi irgi paklaida
                 if (throwingMinDistance <= distanceBetweenMyOpponent && throwingMaxDistance >= distanceBetweenMyOpponent){
-                    // print info. oppenent is shot
+                    // print info. oppenent is shoot
                     Log.i("METIMAS", "Pataikyta min = " + throwingMinDistance + ", max = " + throwingMaxDistance);
                     Log.i("METIMAS", "Pataikyta tikrasis greitis " + accelerometerSpeed);
                     textViewThrowing.setVisibility(View.VISIBLE);
                     textViewThrowing.setText("Pataikyta \nmin = " + throwingMinDistance + ", \nmax = " + throwingMaxDistance + "\n" +
                             "tikrasis greitis " + accelerometerSpeed + "\n Atstumu skirtumas = " + distanceBetweenMyOpponent);
                 }else{
-                    // print info. not shot
+                    // print info. not shoot
                     Log.i("METIMAS", "Nepataikyta min = " + throwingMinDistance + ", max = " + throwingMaxDistance);
                     Log.i("METIMAS", "Nepataikyta tikrasis greitis " + accelerometerSpeed);
                     textViewThrowing.setVisibility(View.VISIBLE);

@@ -152,7 +152,7 @@ public class MainActivity1 extends Activity
     String mIncomingInvitationId = null;
 
     // Message buffer for sending messages
-    byte[] mMsgBuf = new byte[18];
+    byte[] mMsgBuf = new byte[20];
     private Location location;
 
     public static ArrayList<Player> players = new ArrayList<>();
@@ -161,6 +161,7 @@ public class MainActivity1 extends Activity
     float mDistance = -1; //for check -1
     public static double [] mOpponentCoord = new double[2];
     LocationRequest mLocationRequest;
+    public char hit = 'N'; //default
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -794,21 +795,6 @@ public class MainActivity1 extends Activity
                     ballCounterText.setVisibility(View.INVISIBLE);
                     textViewThrowing.setVisibility(View.INVISIBLE);
                     pressedThrow = true;
-                    ////////////////////////////////////////////////
-                    // perkelti, vykdyti, kai kitas zaidejas pataiko
-                    if (heartNum == 3){
-                        heartNum--;
-                        heart1.setVisibility(View.GONE);
-                    }else if (heartNum == 2){
-                        heartNum--;
-                        heart2.setVisibility(View.GONE);
-                    }else if (heartNum == 1){
-                        heartNum--;
-                        heart3.setVisibility(View.GONE);
-                    }else{
-                        // KAS VYKDOMA, KAI GYVYBIU NELIEKA???
-                    }
-                    ///////////////////////////////////////////////
                 }
                 // GAL TURI BUTI PRIES METODA ISKELTAS???
                 if(ballNum == 0){
@@ -881,6 +867,7 @@ public class MainActivity1 extends Activity
     // 'S' message, which indicates that the game should start.
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
+        hit = 'N';
         byte[] buf = rtm.getMessageData();
         String sender = rtm.getSenderParticipantId();
         Log.d(TAG, "Message received: " + (char) buf[0] + "/" + (int) buf[1]);
@@ -904,11 +891,20 @@ public class MainActivity1 extends Activity
 
             // Get parcipiant coordinate (longitude) from buffer
             byte [] temp2 = new byte[8];
-            for (int i = 10; i <  buf.length; i++) {
+            for (int i = 10; i <  buf.length - 2; i++) {
                 temp2[i - 10] = buf[i];
             }
 
             //Log.i("Float", "float" + mOpponentCoord[1]);
+            //Check if player was hit
+            if(buf[18] == 'H'){
+                Log.d(TAG, "Player was hit");
+                wasHit();
+            }else{
+                Log.d(TAG, "Player missed shot");
+            }
+
+
 
             mOpponentCoord[1] = ByteBuffer.wrap(temp2).getDouble();// Longitude
 
@@ -922,7 +918,6 @@ public class MainActivity1 extends Activity
                 // we'd have to add a "serial number" to the packet.
                 mParticipantScore.put(sender, thisScore);
             }
-
 
             // update the scores on the screen
             updatePeerScoresDisplay();
@@ -980,6 +975,9 @@ public class MainActivity1 extends Activity
         for (int i = 0; i <  tempBytes.length; i++){
             mMsgBuf[i + 10] = tempBytes[i];
         }
+
+        // if player hit opponent
+        mMsgBuf[18] = (byte) hit;
 
 
         // Send to every other participant.
@@ -1063,6 +1061,8 @@ public class MainActivity1 extends Activity
         return s.length() == 1 ? "00" + s : s.length() == 2 ? "0" + s : s;
     }
 
+    double opponentLat;
+    double opponentLong;
     // updates the screen with the scores from our peers
     void updatePeerScoresDisplay() {
         ((TextView) findViewById(R.id.score0)).setText(formatScore(mScore) + " - Me");
@@ -1105,6 +1105,8 @@ public class MainActivity1 extends Activity
                 ((TextView) findViewById(arr[i])).setText(formatScore(score) + " - " + p.getDisplayName() +
                 "\n lat - " + lat + "\n lng - " + lng + "\n Atstumas" + mDistance + "\n Oponento koordinates" + mOpponentCoord[0] + " " + mOpponentCoord[1]);
                 ++i;
+                opponentLat = mOpponentCoord[0];
+                opponentLong = mOpponentCoord[1];
             }
         }
 
@@ -1260,7 +1262,8 @@ public class MainActivity1 extends Activity
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
+            double angle = bearing(lat, lng, 54.9823894, 25.76502240000002);
+            Log.i("VAIZDAS ", "KAMPAS = " + String.valueOf(angle));
         }
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
@@ -1275,6 +1278,19 @@ public class MainActivity1 extends Activity
             openCamera();
         }
     };
+
+    // TEORINIS AZIMUTAS
+    protected static double bearing(double lat1, double lon1, double lat2, double lon2) {
+        double longDiff = Math.toRadians(lon2 - lon1);
+        double la1 = Math.toRadians(lat1);
+        double la2 = Math.toRadians(lat2);
+        double y = Math.sin(longDiff) * Math.cos(la2);
+        double x = Math.cos(la1) * Math.sin(la2) - Math.sin(la1) * Math.cos(la2) * Math.cos(longDiff);
+
+        double result = Math.toDegrees(Math.atan2(y, x));
+        return (result+360.0d)%360.0d;
+    }
+
 
     private CameraCaptureSession.StateCallback mPreviewStateCallback = new CameraCaptureSession.StateCallback() {
         @Override
@@ -1395,15 +1411,22 @@ public class MainActivity1 extends Activity
                 }
 
                 // PAKEISTI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                distanceBetweenMyOpponent = 100;
+                distanceBetweenMyOpponent = 100 /*mDistance*/;  // atstumas turi irgi paklaida
                 if (throwingMinDistance <= distanceBetweenMyOpponent && throwingMaxDistance >= distanceBetweenMyOpponent){
-                    // print info. oppenent is shot
+                    // print info. oppenent is shoot
                     Log.i("METIMAS", "Pataikyta min = " + throwingMinDistance + ", max = " + throwingMaxDistance);
                     Log.i("METIMAS", "Pataikyta tikrasis greitis " + accelerometerSpeed);
+                    textViewThrowing.setVisibility(View.VISIBLE);
+                    textViewThrowing.setText("Pataikyta \nmin = " + throwingMinDistance + ", \nmax = " + throwingMaxDistance + "\n" +
+                            "tikrasis greitis " + accelerometerSpeed + "\n Atstumu skirtumas = " + distanceBetweenMyOpponent);
+                    hit = 'H';
                 }else{
-                    // print info. not shot
+                    // print info. not shoot
                     Log.i("METIMAS", "Nepataikyta min = " + throwingMinDistance + ", max = " + throwingMaxDistance);
                     Log.i("METIMAS", "Nepataikyta tikrasis greitis " + accelerometerSpeed);
+                    textViewThrowing.setVisibility(View.VISIBLE);
+                    textViewThrowing.setText("Nepataikyta \nmin = " + throwingMinDistance + ", \nmax = " + throwingMaxDistance + "\n" +
+                            "tikrasis greitis " + accelerometerSpeed + "\n Atstumu skirtumas = " + distanceBetweenMyOpponent);
                 }
             }
         }
@@ -1414,5 +1437,20 @@ public class MainActivity1 extends Activity
 
     }
 
+    public void wasHit(){
+        // kai kitas zaidejas pataiko
+        if (heartNum == 3){
+            heartNum--;
+            heart1.setVisibility(View.GONE);
+        }else if (heartNum == 2){
+            heartNum--;
+            heart2.setVisibility(View.GONE);
+        }else if (heartNum == 1){
+            heartNum--;
+            heart3.setVisibility(View.GONE);
+        }else{
+            // KAS VYKDOMA, KAI GYVYBIU NELIEKA???
+        }
+    }
 }
 
