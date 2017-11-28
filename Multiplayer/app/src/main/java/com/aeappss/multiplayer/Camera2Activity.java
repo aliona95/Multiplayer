@@ -318,6 +318,10 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
 package com.aeappss.multiplayer;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -374,7 +378,7 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
     private Sensor senAccelerometer;
 
     private TextView textViewThrowing;
-    private Button throwingButton;
+    //private Button throwingButton;
     private ImageButton imageButton; //  ball
     private TextView ballCounterText;
     //private TextView ballCounterText1;
@@ -400,32 +404,6 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
         firstBar = (ProgressBar)findViewById(R.id.firstBar);
 
         textViewThrowing = (TextView) findViewById(R.id.textViewThrowing);
-        throwingButton = (Button) findViewById(R.id.throwingButton);
-        throwingButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                firstBar.setVisibility(View.VISIBLE);
-                firstBar.setMax(35);
-                firstBar.setProgress(0);
-                //firstBar.setProgress(3);
-                throwingButton.setVisibility(View.INVISIBLE);
-                textViewThrowing.setVisibility(View.INVISIBLE);
-                pressedThrow = true;
-            }
-        });
-
-        mTextureView = (TextureView) findViewById(R.id.textureView);
-        mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
-
-        final FloatingActionButton mapAction = (FloatingActionButton) findViewById(R.id.action_map);
-        mapAction.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /// MAP INTENT
-                //Toast.makeText(Camera2Activity.this, "AS CIA", Toast.LENGTH_LONG).show();
-                Intent homeIntent = new Intent(Camera2Activity.this, MapsActivity.class);
-                startActivity(homeIntent);
-            }
-        });
 
         heart1 = (ImageView) findViewById(R.id.heart1);
         heart2 = (ImageView) findViewById(R.id.heart2);
@@ -440,10 +418,18 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
             public void onClick(View v) {
                 int ballNum = Integer.valueOf((String) ballCounterText.getText());
                 if(ballNum > 0){
-                   --ballNum;
+                    --ballNum;
                     ballCounterText.setText(String.valueOf(ballNum));
                     //ballCounterText1.setText(String.valueOf(ballNum));
-
+                    firstBar.setVisibility(View.VISIBLE);
+                    firstBar.setMax(35);
+                    firstBar.setProgress(0);
+                    //firstBar.setProgress(3);
+                    imageButton.setVisibility(View.INVISIBLE);
+                    ballCounterText.setVisibility(View.INVISIBLE);
+                    textViewThrowing.setVisibility(View.INVISIBLE);
+                    pressedThrow = true;
+                    ////////////////////////////////////////////////
                     // perkelti, vykdyti, kai kitas zaidejas pataiko
                     if (heartNum == 3){
                         heartNum--;
@@ -457,7 +443,9 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
                     }else{
                         // KAS VYKDOMA, KAI GYVYBIU NELIEKA???
                     }
+                    ///////////////////////////////////////////////
                 }
+                // GAL TURI BUTI PRIES METODA ISKELTAS???
                 if(ballNum == 0){
                     // galbut zaidimo eigoje gaus kamuoliu daugiau, tada atsetinti
                     imageButton.setClickable(false);
@@ -465,6 +453,18 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
             }
         });
 
+        mTextureView = (TextureView) findViewById(R.id.textureView);
+        mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
+
+        final FloatingActionButton mapAction = (FloatingActionButton) findViewById(R.id.action_map);
+        mapAction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /// MAP INTENT
+                Intent homeIntent = new Intent(Camera2Activity.this, MapsActivity.class);
+                startActivity(homeIntent);
+            }
+        });
     }
 
     static class CompareSizesByArea implements Comparator<Size> {
@@ -602,6 +602,23 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
     float accelerometerSpeed;
     boolean throwUp = false;
     boolean wasUp = false;
+    final int MAX_THROW_DISTANCE = 200; // max throwing distance in game
+    float MAX_DEVICE_SPEED; // max device range * max device speed coefficient
+    int MAX_DEVICE_SPEED_COEFF = 2; // max device range * 2
+    int THROW_SPEED_WITH_COEFFICIENT;  // received speed * coefficient
+    float MAX_DEVICE_ERROR; // paklaida
+    float myDeviceMinError = (float) 0.882; // creator's device
+    float myDeviceMaxError = (float) 10.95707; // creator's device
+    float myDeviceMaxSpeed = 64; // creator's device
+    float myDeviceMinSpeed = (float) 10.411; // creator's device
+    float coeff; //
+    float errorSum; // paklaidu suma min + max
+    float ERROR;
+    float accelerometerMinSpeed; // with ERRROR
+    float accelerometerMaxSpeed; // with ERRROR
+    float distanceBetweenMyOpponent; // rasti kas yra toje kriptyje, imti kuris yra arciausiai arba klausi zaidejo i kuri taikomasi
+    float throwingMinDistance; // atstumas paskaiciuotas taip, kad max negaletu buti daugiau nei 200 (MAX_THROW_DISTANCE)
+    float throwingMaxDistance;
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor mySensor = sensorEvent.sensor;
@@ -653,8 +670,50 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
                 doneDown = false;
                 doneUp = false;
                 firstBar.setVisibility(View.INVISIBLE);
-                throwingButton.setVisibility(View.VISIBLE);
+                //throwingButton.setVisibility(View.VISIBLE);
+                imageButton.setVisibility(View.VISIBLE);
+                ballCounterText.setVisibility(View.VISIBLE);
                 last_x = 0;
+                // CALCULATED or hit
+                MAX_DEVICE_SPEED = mySensor.getMaximumRange() * 2;
+                Log.i("METIMAS", "MAX_DEVICE_SPEED = " + String.valueOf(MAX_DEVICE_SPEED));
+                MAX_DEVICE_ERROR = (myDeviceMaxError * mySensor.getMaximumRange() * 2) / myDeviceMaxSpeed; // kiekvieno irenginio max paklaida randama
+                // min device error not found for all devices !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                Log.i("METIMAS", "MAX_DEVICE_ERROR = " + String.valueOf(MAX_DEVICE_ERROR));
+                coeff = (myDeviceMinSpeed + MAX_DEVICE_SPEED) / accelerometerSpeed;
+                errorSum = myDeviceMinError + MAX_DEVICE_ERROR;
+                ERROR = errorSum / coeff;
+                // speed bounds
+                accelerometerMinSpeed = accelerometerSpeed - ERROR;
+                accelerometerMaxSpeed = accelerometerSpeed + ERROR;
+
+                throwingMinDistance = (MAX_THROW_DISTANCE * accelerometerMinSpeed) / MAX_DEVICE_SPEED;
+                throwingMaxDistance = (MAX_THROW_DISTANCE * accelerometerMaxSpeed) / MAX_DEVICE_SPEED;
+
+                // patikrinti ar neateina cia
+                if (throwingMinDistance > MAX_THROW_DISTANCE){
+                    throwingMinDistance = MAX_THROW_DISTANCE;
+                }else if (throwingMaxDistance > MAX_THROW_DISTANCE){
+                    throwingMaxDistance = MAX_THROW_DISTANCE;
+                }
+
+                // PAKEISTI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                distanceBetweenMyOpponent = 100;  // atstumas turi irgi paklaida
+                if (throwingMinDistance <= distanceBetweenMyOpponent && throwingMaxDistance >= distanceBetweenMyOpponent){
+                    // print info. oppenent is shot
+                    Log.i("METIMAS", "Pataikyta min = " + throwingMinDistance + ", max = " + throwingMaxDistance);
+                    Log.i("METIMAS", "Pataikyta tikrasis greitis " + accelerometerSpeed);
+                    textViewThrowing.setVisibility(View.VISIBLE);
+                    textViewThrowing.setText("Pataikyta \nmin = " + throwingMinDistance + ", \nmax = " + throwingMaxDistance + "\n" +
+                            "tikrasis greitis " + accelerometerSpeed + "\n Atstumu skirtumas = " + distanceBetweenMyOpponent);
+                }else{
+                    // print info. not shot
+                    Log.i("METIMAS", "Nepataikyta min = " + throwingMinDistance + ", max = " + throwingMaxDistance);
+                    Log.i("METIMAS", "Nepataikyta tikrasis greitis " + accelerometerSpeed);
+                    textViewThrowing.setVisibility(View.VISIBLE);
+                    textViewThrowing.setText("Nepataikyta \nmin = " + throwingMinDistance + ", \nmax = " + throwingMaxDistance + "\n" +
+                            "tikrasis greitis " + accelerometerSpeed + "\n Atstumu skirtumas = " + distanceBetweenMyOpponent);
+                }
             }
         }
     }
