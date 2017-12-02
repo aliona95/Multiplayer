@@ -155,6 +155,17 @@
                 android:layout_marginLeft="100dp"
                 android:layout_marginTop="300dp"
                 android:padding="300dp"/>
+            <TextView
+                android:id="@+id/ARtext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="100dp"
+                android:layout_marginLeft="200dp"
+                android:layout_marginTop="205dp"
+                android:visibility="gone"
+                android:text="RADAU"
+                android:textSize="50dp"
+                android:textColor="@color/colorPrimaryLight" />
 
             <Button
                 android:id="@+id/button_click_me"
@@ -179,6 +190,21 @@
                 android:padding="0dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/football"
+                android:background="@null"
+                tools:ignore="RtlHardcoded" />
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/person"
+                android:layout_marginBottom="24dp"
+                android:layout_marginLeft="125dp"
+                android:layout_marginTop="310dp"
+                android:visibility="gone"
+                android:adjustViewBounds="true"
+                android:padding="0dp"
+                android:scaleType="fitCenter"
                 android:background="@null"
                 tools:ignore="RtlHardcoded" />
 

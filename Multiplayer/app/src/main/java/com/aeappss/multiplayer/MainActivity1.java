@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -162,6 +164,8 @@ public class MainActivity1 extends Activity
     public static double [] mOpponentCoord = new double[2];
     LocationRequest mLocationRequest;
     public char hit = 'N'; //default
+    TextView arText;
+    ImageView personImage;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -751,6 +755,8 @@ public class MainActivity1 extends Activity
 
         switchToScreen(R.id.screen_game);
         findViewById(R.id.button_click_me).setVisibility(View.VISIBLE);
+        arText = (TextView) findViewById(R.id.ARtext);
+        personImage = (ImageView) findViewById(R.id.imageView);
 
         // run the gameTick() method every second to update the game.
         final Handler h = new Handler();
@@ -766,7 +772,9 @@ public class MainActivity1 extends Activity
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
+        senRotationVect = senSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_GAME);
+        senSensorManager.registerListener(this, senRotationVect , SensorManager.SENSOR_DELAY_GAME);
 
         firstBar = (ProgressBar)findViewById(R.id.firstBar);
         textViewThrowing = (TextView) findViewById(R.id.textViewThrowing);
@@ -1176,6 +1184,7 @@ public class MainActivity1 extends Activity
     private SensorManager senSensorManager;
     private ProgressBar firstBar = null;
     private Sensor senAccelerometer;
+    private Sensor senRotationVect;
 
     private TextView textViewThrowing;
     private ImageButton imageButton; //  ball
@@ -1259,11 +1268,18 @@ public class MainActivity1 extends Activity
         }
     };
 
+
+    private int mAzimuth = 0; // degree
+    float[] orientation = new float[3];
+    float[] rMat = new float[9];
+    double angle = 0;
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-            double angle = bearing(lat, lng, 54.9823894, 25.76502240000002);
-            Log.i("VAIZDAS ", "KAMPAS = " + String.valueOf(angle));
+            double uLat = 55.00509565857462; //54.9823894;
+            double uLng = 25.795183178270236; //25.76502240000002;
+            angle = bearing(lat, lng, uLat, uLng); // 226,72568
+            Log.i("AZIMUTAS1 ", "textureView metode = " + angle);
         }
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
@@ -1411,7 +1427,7 @@ public class MainActivity1 extends Activity
                 }
 
                 // PAKEISTI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                distanceBetweenMyOpponent = 100 /*mDistance*/;  // atstumas turi irgi paklaida
+                distanceBetweenMyOpponent = mDistance;  // atstumas turi irgi paklaida
                 if (throwingMinDistance <= distanceBetweenMyOpponent && throwingMaxDistance >= distanceBetweenMyOpponent){
                     // print info. oppenent is shoot
                     Log.i("METIMAS", "Pataikyta min = " + throwingMinDistance + ", max = " + throwingMaxDistance);
@@ -1429,8 +1445,65 @@ public class MainActivity1 extends Activity
                             "tikrasis greitis " + accelerometerSpeed + "\n Atstumu skirtumas = " + distanceBetweenMyOpponent);
                 }
             }
+        }else if (mySensor.getType() == Sensor.TYPE_ROTATION_VECTOR && mCurScreen == R.id.screen_game) {
+                // calculate th rotation matrix
+                SensorManager.getRotationMatrixFromVector( rMat, sensorEvent.values );
+                // get the azimuth value (orientation[0]) in degree
+                mAzimuth = (int) ( Math.toDegrees( SensorManager.getOrientation( rMat, orientation )[0] ) + 360 ) % 360;
+                Log.i("AZIMUTAS ", "onChanged metode = " + mAzimuth);
+                //teorinio
+                double minAzimuth = angle - accurancy;
+                double maxAzimuth = angle + accurancy;
+                // GALI BUTI KLAIDU !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                /*if (minAzimuth > 360){
+                    minAzimuth -= 360;
+                }*/
+                if (minAzimuth < 0){
+                    minAzimuth += 360;
+                }
+                if (maxAzimuth > 360){
+                    maxAzimuth -= 360;
+                }
+                /*if (maxAzimuth < 0){
+                    maxAzimuth += 360;
+                }*/
+                double temp;
+                if (minAzimuth > maxAzimuth){
+                    temp = minAzimuth;
+                    minAzimuth = maxAzimuth;
+                    maxAzimuth = temp;
+                }
+                /*if (angle >= minAzimuth && angle <= maxAzimuth){
+                    arText.setVisibility(View.VISIBLE);
+                    arText.setText("RADAU " + mAzimuth + "\n min \n" + minAzimuth + "\n max \n" + maxAzimuth);
+                    //Log.i("AZIMUTAS ", "MATOMAS " + mAzimuth);
+                }else {
+                    arText.setVisibility(View.INVISIBLE);
+                }*/
+                if (isBetween(minAzimuth, maxAzimuth, mAzimuth)){
+                    //arText.setVisibility(View.VISIBLE);
+                    //arText.setText("RADAU " + mAzimuth + "\n min \n" + minAzimuth + "\n max \n" + maxAzimuth);
+                    personImage.setVisibility(View.VISIBLE);
+                }else{
+                    //arText.setVisibility(View.INVISIBLE);
+                    personImage.setVisibility(View.INVISIBLE);
+                }
         }
     }
+    double accurancy = 30;
+
+    //Метод isBetween определяет, находится ли азимут в целевом диапазоне с учетом допустимых отклонений
+    private boolean isBetween(double minAngle, double maxAngle, double azimuth) {
+        if (minAngle > maxAngle) {
+            /*if (isBetween(0, maxAngle, azimuth) && isBetween(minAngle, 360, azimuth))
+                return true;*/
+        } else {
+            if (azimuth > minAngle && azimuth < maxAngle)
+                return true;
+        }
+        return false;
+    }
+
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {

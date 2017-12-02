@@ -355,8 +355,10 @@ import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 import android.content.Intent;
 
@@ -504,6 +506,9 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
 
         }
     };
+
+    private double screenWidth;
+    private double screenHeight;
 
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
