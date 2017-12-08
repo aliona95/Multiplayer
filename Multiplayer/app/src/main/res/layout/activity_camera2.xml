@@ -8,7 +8,9 @@
     android:layout_height="match_parent">
     <FrameLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
         <TextureView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -41,36 +43,25 @@
             android:layout_marginLeft="150dp"
             android:layout_marginTop="285dp"/>
 
-        <ImageButton
-            android:id="@+id/imageButton"
-            android:layout_width="130dp"
-            android:layout_height="97dp"
-            android:layout_marginBottom="0dp"
-            android:layout_marginLeft="125dp"
-            android:layout_marginTop="500dp"
-            android:adjustViewBounds="true"
-            android:background="@null"
-            android:padding="0dp"
-            android:scaleType="fitCenter"
-            fab:srcCompat="@drawable/football" />
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="150dp"
-            android:layout_height="100dp"
-            android:text="9"
-            android:textColor="@color/colorAccent"
-            android:layout_marginBottom="0dp"
-            android:layout_marginLeft="175dp"
-            android:layout_marginTop="510dp"
-            android:adjustViewBounds="true"
-            android:textSize="55dp"/>
-
         <ImageView
             android:id="@+id/imageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:srcCompat="@drawable/person" />
+
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="138dp"
+            android:layout_height="152dp"
+            android:layout_marginBottom="24dp"
+            android:layout_marginLeft="125dp"
+            android:layout_marginTop="480dp"
+            android:adjustViewBounds="true"
+            android:padding="-30dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/orange"
+            android:background="@null"
+            tools:ignore="RtlHardcoded"  />
         <!--<TextView
             android:id="@+id/textView1"
             android:layout_width="150dp"
@@ -82,7 +73,16 @@
             android:layout_marginTop="530dp"
             android:adjustViewBounds="true"
             android:textSize="15dp"/>-->
-
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="150dp"
+            android:layout_height="100dp"
+            android:layout_marginLeft="175dp"
+            android:layout_marginTop="510dp"
+            android:adjustViewBounds="true"
+            android:text="9"
+            android:textColor="@color/colorAccent"
+            android:textSize="55dp" />
     </FrameLayout>
 
     <ImageView

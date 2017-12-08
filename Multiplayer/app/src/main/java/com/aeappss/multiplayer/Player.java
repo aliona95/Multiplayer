@@ -11,6 +11,26 @@ public class Player {
     private double latitude;
     private double longitude;
 
+    public float getDistance() {
+        return distance;
+    }
+
+    public void setDistance(float distance) {
+        this.distance = distance;
+    }
+
+    private float distance;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    private String id;
+
     public boolean isPataikyta() {
         return pataikyta;
     }

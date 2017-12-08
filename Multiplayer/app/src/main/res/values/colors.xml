@@ -19,4 +19,6 @@
     <color name="colorActionButton">#fffde7</color>
     <color name="colorPrimaryLight">#5F71B5</color>
     <color name="colorWindowBackground">#333</color>
+    <color name="colorBackground">#ffc800</color>
+    <color name="colorStatusBar">#ffa600</color>
 </resources>

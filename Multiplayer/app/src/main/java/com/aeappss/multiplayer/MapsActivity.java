@@ -152,7 +152,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mCurrLocationMarker.remove();
         }
 
-        //Place current location marker for all game session players
+        //Place current location marker for all game session players (gali but reikes dviguba cikla prasukti....)
         for(int i = 0; i < MainActivity1.players.size(); i++){
             LatLng latLng = new LatLng(MainActivity1.players.get(i).getLatitude(),MainActivity1.players.get(i).getLongitude());
             MarkerOptions markerOptions = new MarkerOptions();

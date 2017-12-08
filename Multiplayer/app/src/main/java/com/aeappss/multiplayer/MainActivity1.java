@@ -1,6 +1,7 @@
 package com.aeappss.multiplayer;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -160,17 +162,29 @@ public class MainActivity1 extends Activity
     public static ArrayList<Player> players = new ArrayList<>();
 
     //To DO add distance to Player class
-    float mDistance = -1; //for check -1
+    //float mDistance = -1; //for check -1
+    float mDistance = -1;
     public static double [] mOpponentCoord = new double[2];
     LocationRequest mLocationRequest;
     public char hit = 'N'; //default
     TextView arText;
     ImageView personImage;
+    ImageButton inviteButton;
+    ImageButton seeInvitationsButton;
+    ImageButton cameraGame;
+    ImageButton exitButton;
+    //ImageButton backButton;
 
+    Button settingsButton;
+    TextView inviteText;
+    TextView seeInvitationText;
+
+    @SuppressLint("WrongViewCast")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main1);
+        switchToMainScreen();
         //Log.i("LOGAS", "AS CIA");
 
         // Create the Google Api Client with access to Games
@@ -187,6 +201,16 @@ public class MainActivity1 extends Activity
             findViewById(id).setOnClickListener(this);
         }
 
+        inviteButton = (ImageButton) findViewById(R.id.button_invite_players);
+        seeInvitationsButton = (ImageButton) findViewById(R.id.button_see_invitations);
+        cameraGame = (ImageButton) findViewById(R.id.button_camera_game);
+        settingsButton = (Button) findViewById(R.id.button_settings);
+        exitButton = (ImageButton) findViewById(R.id.exit_button);
+        //backButton = (ImageButton) findViewById(R.id.button_back);
+
+        inviteText = (TextView) findViewById(R.id.invite_text);
+        seeInvitationText = (TextView) findViewById(R.id.see_invitation_text);
+
         mTextureView = (TextureView) findViewById(R.id.textureView);
         mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
     }
@@ -195,8 +219,21 @@ public class MainActivity1 extends Activity
     @Override
     public void onClick(View v) {
         Intent intent;
-
         switch (v.getId()) {
+            case R.id.start_button:
+                switchToScreen(R.id.screen_main);
+                inviteButton.setVisibility(View.VISIBLE);
+                seeInvitationsButton.setVisibility(View.VISIBLE);
+                cameraGame.setVisibility(View.VISIBLE);
+                settingsButton.setVisibility(View.VISIBLE);
+                //backButton.setVisibility(View.VISIBLE);
+
+                inviteText.setVisibility(View.VISIBLE);
+                seeInvitationText.setVisibility(View.VISIBLE);
+                break;
+            case R.id.exit_button:
+                System.exit(0);
+                break;
             case R.id.button_invite_players:
                 // show list of invitable players
                 intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(mGoogleApiClient, 1, 3);
@@ -289,7 +326,7 @@ public class MainActivity1 extends Activity
     private void handleSelectPlayersResult(int response, Intent data) {
         if (response != Activity.RESULT_OK) {
             Log.w(TAG, "*** select players UI cancelled, " + response);
-            switchToMainScreen();
+            switchToScreen(R.id.screen_main);
             return;
         }
 
@@ -330,7 +367,7 @@ public class MainActivity1 extends Activity
     private void handleInvitationInboxResult(int response, Intent data) {
         if (response != Activity.RESULT_OK) {
             Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
-            switchToMainScreen();
+            switchToScreen(R.id.screen_main);
             return;
         }
 
@@ -724,12 +761,15 @@ public class MainActivity1 extends Activity
         mFinishedParticipants.clear();
     }
 
+    //This method is used to create Players.
     void initialisePlayersData(){
         players.clear();
             for(int i = 0; i < mParticipants.size(); i++){
                 Player player = new Player();
                 player.setName(mParticipants.get(i).getDisplayName());
                 player.setImageUrl(mParticipants.get(i).getIconImageUrl());
+                player.setId(mParticipants.get(i).getParticipantId());
+                /*
                 if(i != 0){
                     player.setLatitude(mOpponentCoord[0]);
                     player.setLongitude(mOpponentCoord[1]);
@@ -737,17 +777,24 @@ public class MainActivity1 extends Activity
                     player.setLatitude(lat);
                     player.setLongitude(lng);
                 }
-                players.add(player);
-                /*
-                if (mParticipants.get(i).getParticipantId().equals(mMyId)&& (i == mParticipants.size() - 1)){
-                    Collections.reverse(players);
-                }
                 */
+                players.add(player);
             }
+    }
+
+    //This method is used to update Player coordinates.
+    void initialisePlayersData(double lat, double longittude, String id){
+        for (int i = 0; i < players.size(); i++){
+            if (players.get(i).getId().equals(id)){
+                players.get(i).setLatitude(lat);
+                players.get(i).setLongitude(longittude);
+            }
+        }
     }
 
     // Start the gameplay phase of the game.
     void startGame(boolean multiplayer) {
+        initialisePlayersData();
         mMultiplayer = multiplayer;
         updateScoreDisplay();
         broadcastScore(false);
@@ -895,8 +942,6 @@ public class MainActivity1 extends Activity
                 temp[i - 2] = buf[i];
             }
 
-            mOpponentCoord[0] = ByteBuffer.wrap(temp).getDouble();
-
             // Get parcipiant coordinate (longitude) from buffer
             byte [] temp2 = new byte[8];
             for (int i = 10; i <  buf.length - 2; i++) {
@@ -912,8 +957,8 @@ public class MainActivity1 extends Activity
                 Log.d(TAG, "Player missed shot");
             }
 
-
-
+            //Get id player to recognized it.
+            mOpponentCoord[0] = ByteBuffer.wrap(temp).getDouble(); // Lattitude
             mOpponentCoord[1] = ByteBuffer.wrap(temp2).getDouble();// Longitude
 
             if (thisScore > existingScore) {
@@ -948,12 +993,6 @@ public class MainActivity1 extends Activity
                 }
             }
         }
-    }
-
-    public static float toFloat(byte[] bytes) {
-        float f = ByteBuffer.wrap(bytes).getFloat();
-        f = (float)((int)(f *1000000f ))/1000000f;
-        return f;
     }
 
     // Broadcast my score to everybody else.
@@ -1018,12 +1057,12 @@ public class MainActivity1 extends Activity
     final static int[] CLICKABLES = {
             R.id.button_accept_popup_invitation, R.id.button_invite_players,
             R.id.button_see_invitations, R.id.button_click_me, R.id.button_camera_game,
-            R.id.button_settings
+            R.id.button_settings, R.id.start_button, R.id.exit_button
     };
 
     // This array lists all the individual screens our game has.
     final static int[] SCREENS = {
-            R.id.screen_game, R.id.screen_main,
+            R.id.screen_game, R.id.screen_menu, R.id.screen_main,
             R.id.screen_wait
     };
     int mCurScreen = -1;
@@ -1052,7 +1091,7 @@ public class MainActivity1 extends Activity
 
     void switchToMainScreen() {
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            switchToScreen(R.id.screen_main);
+            switchToScreen(R.id.screen_menu);
         }
     }
 
@@ -1110,11 +1149,19 @@ public class MainActivity1 extends Activity
                     continue;
                 int pl = 2;
                 int score = mParticipantScore.containsKey(pid) ? mParticipantScore.get(pid) : 0;
+
+
                 ((TextView) findViewById(arr[i])).setText(formatScore(score) + " - " + p.getDisplayName() +
                 "\n lat - " + lat + "\n lng - " + lng + "\n Atstumas" + mDistance + "\n Oponento koordinates" + mOpponentCoord[0] + " " + mOpponentCoord[1]);
                 ++i;
-                opponentLat = mOpponentCoord[0];
-                opponentLong = mOpponentCoord[1];
+                /////Cia klaida....
+                /*
+                ((TextView) findViewById(arr[i])).setText(formatScore(score) + " - " + players.get(i).getName() +
+                        "\n lat - " + players.get(i).getLatitude() + "\n lng - " + players.get(i).getLongitude() /*+ "\n Atstumas" + players.get(i).getDistance()*/ /*+ "\n Oponento koordinates" + mOpponentCoord[0] + " " + mOpponentCoord[1]);
+                ++i;
+                */
+               // opponentLat = mOpponentCoord[0];
+                //opponentLong = mOpponentCoord[1];
             }
         }
 
@@ -1151,12 +1198,24 @@ public class MainActivity1 extends Activity
         //Toast.makeText(this, "ACCURANCY " + location.getAccuracy(), Toast.LENGTH_LONG).show();
 
         // Canculate distance between players.
+        /*
         Location location2 = new Location("locationB");
         location2.setLatitude(mOpponentCoord[0]);
         location2.setLongitude(mOpponentCoord[1]);
         mDistance = location.distanceTo(location2);
         if(mParticipants!= null){
             initialisePlayersData();
+        }
+        */
+        if(players.size() > 0){
+            for(int i = 0; i < players.size(); i++){
+                if(!players.get(i).getId().equals(mMyId)) {
+                    Location location2 = new Location("locationB");
+                    location2.setLatitude(players.get(i).getLatitude());
+                    location2.setLongitude(players.get(i).getLongitude());
+                    players.get(i).setDistance(location.distanceTo(location2));
+                }
+            }
         }
     }
 

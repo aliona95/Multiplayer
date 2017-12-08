@@ -19,10 +19,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorBackground"
     xmlns:fab="http://schemas.android.com/apk/res-auto">
 
     <!-- MAIN SCREEN -->
-    <LinearLayout android:id="@+id/screen_main" style="@style/LLScreen">
+    <!--<LinearLayout android:id="@+id/screen_main" style="@style/LLScreen">
         <TextView style="@style/GameTitle" />
         <Button android:id="@+id/button_invite_players"
             style="@style/MainScreenButton"
@@ -40,6 +41,154 @@
         <Button android:id="@+id/button_settings"
             style="@style/MainScreenButton"
             android:text="settings" />
+    </LinearLayout>-->
+    <LinearLayout android:id="@+id/screen_menu"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+        <!--<TextView style="@style/GameTitle" />-->
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="170dp">
+            <ImageButton
+                android:id="@+id/start_button"
+                android:src="@drawable/start"
+                android:background="@null"
+                android:adjustViewBounds="true"
+                style="@style/MainScreenButton"
+                tools:ignore="RtlHardcoded"
+                android:layout_height="60dp"
+                android:layout_width="wrap_content"
+                android:layout_marginTop="0dp"
+                android:gravity="center_horizontal"/>
+            <ImageButton
+                android:id="@+id/options_button"
+                android:src="@drawable/options"
+                android:background="@null"
+                android:adjustViewBounds="true"
+                style="@style/MainScreenButton"
+                tools:ignore="RtlHardcoded"
+                android:layout_height="60dp"
+                android:layout_width="wrap_content"
+                android:layout_marginTop="70dp"
+                android:gravity="center_horizontal"/>
+            <ImageButton
+                android:id="@+id/exit_button"
+                android:src="@drawable/exit"
+                android:background="@null"
+                android:adjustViewBounds="true"
+                style="@style/MainScreenButton"
+                tools:ignore="RtlHardcoded"
+                android:layout_height="60dp"
+                android:layout_width="wrap_content"
+                android:layout_marginTop="140dp"
+                android:gravity="center_horizontal"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <!-- after "START' button-->
+    <LinearLayout android:id="@+id/screen_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+        <!--<TextView style="@style/GameTitle" />-->
+        <!--<Button android:id="@+id/button_invite_players"
+            android:visibility="gone"
+            style="@style/MainScreenButton"
+            android:text="@string/invite_players" />-->
+        <ImageButton
+            android:id="@+id/button_invite_players"
+            android:src="@drawable/more_players"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:background="@null"
+            android:adjustViewBounds="true"
+            android:visibility="gone"
+            style="@style/MainScreenButton"
+            tools:ignore="RtlHardcoded"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="30dp"
+            android:gravity="center_horizontal"/>
+        <TextView style="@style/MainScreenButtonBlurb"
+            android:id="@+id/invite_text"
+            android:visibility="gone"
+            android:layout_marginTop="-30dp"
+            android:text="@string/invite_players_explanation" />
+        <!--<Button android:id="@+id/button_see_invitations"
+            style="@style/MainScreenButton"
+            android:visibility="gone"
+            android:text="@string/see_invitations" />-->
+        <ImageButton
+            android:id="@+id/button_see_invitations"
+            android:src="@drawable/see_invintations"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:background="@null"
+            android:adjustViewBounds="true"
+            android:visibility="gone"
+            style="@style/MainScreenButton"
+            tools:ignore="RtlHardcoded"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="-40dp"
+            android:gravity="center_horizontal"/>
+        <TextView style="@style/MainScreenButtonBlurb"
+            android:id="@+id/see_invitation_text"
+            android:visibility="gone"
+            android:layout_marginTop="-30dp"
+            android:text="@string/see_invitations_explanation" />
+        <ImageButton
+            android:id="@+id/button_camera_game"
+            android:src="@drawable/one_player"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:background="@null"
+            android:adjustViewBounds="true"
+            android:visibility="gone"
+            style="@style/MainScreenButton"
+            tools:ignore="RtlHardcoded"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="-40dp"
+            android:gravity="center_horizontal"/>
+        <!--<Button android:id="@+id/button_camera_game"
+            android:visibility="gone"
+            style="@style/MainScreenButton"
+            android:text="camera game" />-->
+        <Button android:id="@+id/button_settings"
+            android:visibility="gone"
+            style="@style/MainScreenButton"
+            android:text="settings" />
+        <!--<LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <Button android:id="@+id/button_settings"
+                    android:visibility="gone"
+                    style="@style/MainScreenButton"
+                    android:layout_marginLeft="170dp"
+                    android:text="settings" />
+                <ImageButton
+                    android:id="@+id/button_back"
+                    android:src="@drawable/one_player"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"
+                    android:background="@null"
+                    android:adjustViewBounds="true"
+                    android:visibility="gone"
+                    android:layout_marginLeft="70dp"
+                    style="@style/MainScreenButton"
+                    tools:ignore="RtlHardcoded"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_marginTop="-20dp"
+                    android:gravity="center_horizontal"/>
+            </RelativeLayout>
+        </LinearLayout>-->
     </LinearLayout>
 
     <!-- INVITATION POPUP -->
