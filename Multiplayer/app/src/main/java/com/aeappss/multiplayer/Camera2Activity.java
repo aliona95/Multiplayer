@@ -323,6 +323,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
+import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -399,6 +400,8 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera2);
 
+        Typeface myFont = Typeface.createFromAsset(getAssets(), "fonts/rocko.ttf");
+
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
@@ -411,6 +414,7 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
         heart2 = (ImageView) findViewById(R.id.heart2);
         heart3 = (ImageView) findViewById(R.id.heart3);
         ballCounterText = (TextView) findViewById(R.id.textView);
+        ballCounterText.setTypeface(myFont);
         //ballCounterText1 = (TextView) findViewById(R.id.textView1);
 
         // TURI BUTI VYKDOMAS METIMAS CIA

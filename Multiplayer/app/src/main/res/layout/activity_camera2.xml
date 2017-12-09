@@ -37,6 +37,7 @@
             android:text="Metimas"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:background="@color/colorPrimary"
             android:textColor="@color/colorAccent"
             android:id="@+id/throwingButton"
@@ -47,6 +48,8 @@
             android:id="@+id/imageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="200dp"
+            android:layout_marginLeft="125dp"
             fab:srcCompat="@drawable/person" />
 
         <ImageButton
@@ -54,12 +57,11 @@
             android:layout_width="138dp"
             android:layout_height="152dp"
             android:layout_marginBottom="24dp"
-            android:layout_marginLeft="125dp"
+            android:layout_marginLeft="120dp"
             android:layout_marginTop="480dp"
             android:adjustViewBounds="true"
-            android:padding="-30dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/orange"
+            android:padding="0dp"
+            android:src="@drawable/glossy_ball1"
             android:background="@null"
             tools:ignore="RtlHardcoded"  />
         <!--<TextView
@@ -77,57 +79,74 @@
             android:id="@+id/textView"
             android:layout_width="150dp"
             android:layout_height="100dp"
-            android:layout_marginLeft="175dp"
-            android:layout_marginTop="510dp"
+            android:layout_marginLeft="170dp"
+            android:layout_marginTop="515dp"
             android:adjustViewBounds="true"
             android:text="9"
             android:textColor="@color/colorAccent"
             android:textSize="55dp" />
+
+        <ImageButton
+            android:id="@+id/map"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="24dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="180dp"
+            android:background="@drawable/map" />
     </FrameLayout>
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        fab:srcCompat="@drawable/radar"
+        fab:srcCompat="@drawable/radar1"
         android:id="@+id/radar"
-        android:layout_alignParentLeft="true"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp" />
+        android:layout_marginStart="11dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="16dp">
+        android:layout_marginRight="16dp"
+        android:id="@+id/linearLayout"
+        android:layout_below="@+id/firstBar"
+        android:layout_centerHorizontal="true">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:srcCompat="@drawable/ic_favorite_black_24dp"
             android:id="@+id/heart1"
+            android:layout_width="72dp"
+            android:layout_height="67dp"
             android:layout_alignParentRight="true"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="0dp"
             android:outlineProvider="bounds"
+            fab:srcCompat="@drawable/heart"
             tools:ignore="VectorDrawableCompat" />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:srcCompat="@drawable/ic_favorite_black_24dp"
             android:id="@+id/heart2"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="16dp"
-            tools:ignore="VectorDrawableCompat" />
+            android:layout_width="72dp"
+            android:layout_height="67dp"
+            android:outlineProvider="bounds"
+            fab:srcCompat="@drawable/heart"
+            tools:ignore="VectorDrawableCompat"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/heart1"
+            android:layout_marginEnd="32dp" />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:srcCompat="@drawable/ic_favorite_black_24dp"
             android:id="@+id/heart3"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="16dp"
-            tools:ignore="VectorDrawableCompat" />
-    </LinearLayout>
+            android:layout_width="72dp"
+            android:layout_height="67dp"
+            android:outlineProvider="bounds"
+            fab:srcCompat="@drawable/heart"
+            tools:ignore="VectorDrawableCompat"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="52dp" />
+    </RelativeLayout>
 
     <ProgressBar
         android:id="@+id/firstBar"
@@ -145,6 +164,7 @@
         android:id="@+id/multiple_actions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"

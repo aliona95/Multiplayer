@@ -13,6 +13,7 @@
     <color name="yellow">#fbc02d</color>
     <color name="yellow_pressed">#fdd835</color>
     <color name="green">#1b5e20</color>
+    <color name="green1">#bb1b5e20</color>
     <color name="green_pressed">#2e7d32</color>
     <color name="blue_semi_transparent">#805677fc</color>
     <color name="blue_semi_transparent_pressed">#80738ffe</color>
