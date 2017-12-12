@@ -12,6 +12,35 @@
         android:textAlignment="center"
         android:padding="50dp"
         android:layout_marginTop="150dp"
-        tools:ignore="MissingConstraints" />
+        tools:ignore="MissingConstraints"
+        android:id="@+id/textView2"
+        android:textColor="@color/green"/>
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="26dp"
+        android:background="@drawable/radar1"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="55dp" />
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/radar1"
+        android:layout_alignTop="@+id/textView2"
+        android:layout_alignEnd="@+id/textView2"
+        android:layout_marginTop="164dp" />
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="@drawable/radar1"
+        android:layout_below="@+id/imageView3"
+        android:layout_alignStart="@+id/imageView2"
+        android:layout_marginStart="21dp" />
+
 
 </RelativeLayout>

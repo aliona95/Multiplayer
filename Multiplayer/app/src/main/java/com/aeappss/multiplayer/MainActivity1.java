@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
+import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -44,7 +45,9 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,8 +77,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import static java.lang.Math.abs;
@@ -156,10 +161,11 @@ public class MainActivity1 extends Activity
     String mIncomingInvitationId = null;
 
     // Message buffer for sending messages
-    byte[] mMsgBuf = new byte[20];
+    byte[] mMsgBuf = new byte[50];
     private Location location;
 
-    public static ArrayList<Player> players = new ArrayList<>();
+    public static ArrayList<Player> players = new ArrayList<>(); //all opponents except player
+    public static Player player;
 
     //To DO add distance to Player class
     //float mDistance = -1; //for check -1
@@ -179,11 +185,16 @@ public class MainActivity1 extends Activity
     TextView inviteText;
     TextView seeInvitationText;
 
+    TextView text;
+    ImageButton mapButton;
+
     @SuppressLint("WrongViewCast")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main1);
+        //width = getWindowManager().getDefaultDisplay().getWidth();
+        //height = getWindowManager().getDefaultDisplay().getHeight();
         switchToMainScreen();
         //Log.i("LOGAS", "AS CIA");
 
@@ -210,6 +221,11 @@ public class MainActivity1 extends Activity
 
         inviteText = (TextView) findViewById(R.id.invite_text);
         seeInvitationText = (TextView) findViewById(R.id.see_invitation_text);
+
+        Typeface myFont = Typeface.createFromAsset(getAssets(), "fonts/rocko.ttf");
+
+        text = (TextView) findViewById(R.id.textView2);
+        text.setTypeface(myFont);
 
         mTextureView = (TextureView) findViewById(R.id.textureView);
         mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
@@ -598,7 +614,7 @@ public class MainActivity1 extends Activity
         //switchToScreen(R.id.screen_sign_in);
     }
 
-
+    public static boolean onConnectedToRoom = false;
     // Called when we are connected to the room. We're not ready to play yet! (maybe not everybody
     // is connected yet).
     @Override
@@ -608,7 +624,7 @@ public class MainActivity1 extends Activity
         //get participants and my ID:
         mParticipants = room.getParticipants();
         mMyId = room.getParticipantId(Games.Players.getCurrentPlayerId(mGoogleApiClient));
-
+        Log.i("onConnectedToRoom", mMyId);
         // save room ID if its not initialized in onRoomCreated() so we can leave cleanly before the game starts.
         if(mRoomId==null)
             mRoomId = room.getRoomId();
@@ -617,6 +633,9 @@ public class MainActivity1 extends Activity
         Log.d(TAG, "Room ID: " + mRoomId);
         Log.d(TAG, "My ID " + mMyId);
         Log.d(TAG, "<< CONNECTED TO ROOM>>");
+
+        initialisePlayersData();
+        onConnectedToRoom = true;
     }
 
     // Called when we've successfully left the room (this happens a result of voluntarily leaving
@@ -763,22 +782,25 @@ public class MainActivity1 extends Activity
 
     //This method is used to create Players.
     void initialisePlayersData(){
-        players.clear();
+        //players.clear();
             for(int i = 0; i < mParticipants.size(); i++){
-                Player player = new Player();
-                player.setName(mParticipants.get(i).getDisplayName());
-                player.setImageUrl(mParticipants.get(i).getIconImageUrl());
-                player.setId(mParticipants.get(i).getParticipantId());
-                /*
-                if(i != 0){
-                    player.setLatitude(mOpponentCoord[0]);
-                    player.setLongitude(mOpponentCoord[1]);
+                Log.i("UZEJO ", String.valueOf(mMyId));
+                if(mParticipants.get(i).getParticipantId().equals(mMyId)){
+                    player = new Player();
+                    player.setName(mParticipants.get(i).getDisplayName());
+                    player.setImageUrl(mParticipants.get(i).getIconImageUrl());
+                    player.setId(mParticipants.get(i).getParticipantId());
+                    Random r = new Random();
+                    char c = (char)(r.nextInt(1) + 'A');
+                    player.setTeam(c);
+                    Log.i("UZEJO ", "AAA");
                 }else{
-                    player.setLatitude(lat);
-                    player.setLongitude(lng);
+                    Player player = new Player();
+                    player.setName(mParticipants.get(i).getDisplayName());
+                    player.setImageUrl(mParticipants.get(i).getIconImageUrl());
+                    player.setId(mParticipants.get(i).getParticipantId());
+                    players.add(player);
                 }
-                */
-                players.add(player);
             }
     }
 
@@ -794,10 +816,19 @@ public class MainActivity1 extends Activity
 
     // Start the gameplay phase of the game.
     void startGame(boolean multiplayer) {
-        initialisePlayersData();
         mMultiplayer = multiplayer;
         updateScoreDisplay();
         broadcastScore(false);
+
+        rlMain = (RelativeLayout ) findViewById(R.id.layout);
+
+        /*rlMain = (RelativeLayout) findViewById(R.id.layout);
+        person = new ImageView(this);
+        person.setImageResource(R.drawable.person);
+        params = new RelativeLayout.LayoutParams(380, 380);// mastelis figuros
+        params.topMargin = 50;
+        params.leftMargin = 540 - (380/2); // per viduri ekrano,jei 0laipsniu paklaida
+        rlMain.addView(person, params);*/
 
 
         switchToScreen(R.id.screen_game);
@@ -820,8 +851,8 @@ public class MainActivity1 extends Activity
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senRotationVect = senSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-        senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_GAME);
-        senSensorManager.registerListener(this, senRotationVect , SensorManager.SENSOR_DELAY_GAME);
+        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_GAME);
+        senSensorManager.registerListener(this, senRotationVect, SensorManager.SENSOR_DELAY_GAME);
 
         firstBar = (ProgressBar)findViewById(R.id.firstBar);
         textViewThrowing = (TextView) findViewById(R.id.textViewThrowing);
@@ -829,7 +860,9 @@ public class MainActivity1 extends Activity
         heart1 = (ImageView) findViewById(R.id.heart1);
         heart2 = (ImageView) findViewById(R.id.heart2);
         heart3 = (ImageView) findViewById(R.id.heart3);
+        Typeface myFont = Typeface.createFromAsset(getAssets(), "fonts/rocko.ttf");
         ballCounterText = (TextView) findViewById(R.id.textView);
+        ballCounterText.setTypeface(myFont);
 
         // ZAIDIMO LOGIKA
         // TURI BUTI VYKDOMAS METIMAS CIA
@@ -859,7 +892,7 @@ public class MainActivity1 extends Activity
             }
         });
 
-        final FloatingActionButton mapAction = (FloatingActionButton) findViewById(R.id.action_map);
+        final FloatingActionButton mapAction = (FloatingActionButton) findViewById(R.id.map);
         mapAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -867,6 +900,15 @@ public class MainActivity1 extends Activity
                 Intent mapsIntent = new Intent(getApplicationContext(), MapsActivity.class);
                 ///mapsIntent.putExtra("OpponentCordinate", mOpponentCoord);
                 startActivity(mapsIntent);
+            }
+        });
+        mapButton = (ImageButton) findViewById(R.id.action_map);
+        mapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /// MAP INTENT
+                Intent homeIntent = new Intent(MainActivity1.this, MapsActivity.class);
+                startActivity(homeIntent);
             }
         });
     }
@@ -945,6 +987,9 @@ public class MainActivity1 extends Activity
             // Get parcipiant coordinate (longitude) from buffer
             byte [] temp2 = new byte[8];
             for (int i = 10; i <  buf.length - 2; i++) {
+                if(i == 18){
+                    break;
+                }
                 temp2[i - 10] = buf[i];
             }
 
@@ -958,6 +1003,25 @@ public class MainActivity1 extends Activity
             }
 
             //Get id player to recognized it.
+            String id = "";
+            for(int i = 19; i < buf.length; i++){
+                id += (char) buf[i];
+            }
+            String opponentId = id.substring(0, 17);
+            Log.i("ZaidejuID", mParticipants.get(0).getParticipantId() + " " + mParticipants.get(0).getDisplayName() + "\n" +  mParticipants.get(1).getParticipantId() + " " + mParticipants.get(1).getDisplayName() +  "\n"
+            +mMyId + "\n" + id + "\n" + players.size() + " \n" + players.get(0).getId());
+            Log.i("ZaidejoId", mMyId  + " \n" + id);
+            for(int j = 0; j < players.size(); j++){
+                if(players.get(j).getId().equals(id)){
+                    //Log.i("IFAS", id  + " \n" + opponentId);
+                    Log.i("Coord", ByteBuffer.wrap(temp).getDouble() + " " + ByteBuffer.wrap(temp2).getDouble());
+                    players.get(j).setLongitude(ByteBuffer.wrap(temp2).getDouble());
+                    players.get(j).setLatitude(ByteBuffer.wrap(temp).getDouble());
+
+                }
+            }
+
+            ///Log.i("OpponentId", buf[19]);
             mOpponentCoord[0] = ByteBuffer.wrap(temp).getDouble(); // Lattitude
             mOpponentCoord[1] = ByteBuffer.wrap(temp2).getDouble();// Longitude
 
@@ -998,7 +1062,7 @@ public class MainActivity1 extends Activity
     // Broadcast my score to everybody else.
     void broadcastScore(boolean finalScore) {
         //Initialise player data
-        initialisePlayersData();
+       // initialisePlayersData();
         if (!mMultiplayer)
             return; // playing single-player mode
 
@@ -1026,6 +1090,10 @@ public class MainActivity1 extends Activity
         // if player hit opponent
         mMsgBuf[18] = (byte) hit;
 
+        byte [] bytes = mMyId.getBytes();
+        for(int i = 0; i < bytes.length - 1; i++){
+            mMsgBuf[19 + i] = bytes[i];
+        }
 
         // Send to every other participant.
         for (Participant p : mParticipants) {
@@ -1092,6 +1160,7 @@ public class MainActivity1 extends Activity
     void switchToMainScreen() {
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             switchToScreen(R.id.screen_menu);
+            text.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1111,13 +1180,14 @@ public class MainActivity1 extends Activity
     double opponentLat;
     double opponentLong;
     // updates the screen with the scores from our peers
+    public static  boolean peer = false;
     void updatePeerScoresDisplay() {
         ((TextView) findViewById(R.id.score0)).setText(formatScore(mScore) + " - Me");
         int[] arr = {
                 R.id.score1, R.id.score2, R.id.score3
         };
         int i = 0;
-
+       // Log.i("Player", players.get(i).getName());
         ////////////////////////////////////////////////////////////////////////////////////////////
         /*
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -1137,10 +1207,21 @@ public class MainActivity1 extends Activity
             lng = (float) location.getLongitude();
         }
         */
-
-
+        /*
+        String playersInfo = "";
+        for(int j = 0; j < player.getDistance(); j++){
+            playersInfo += player.getDistPlayers();
+        }*/
         ////////////////////////////////////////////////////////////////////////////////////////////
+/*
+        if(!peer){
+            initialisePlayersData();
+        }
+        peer = true;
+        */
+
         if (mRoomId != null) {
+            printMap(player.getDistPlayers());
             for (Participant p : mParticipants) {
                 String pid = p.getParticipantId();
                 if (pid.equals(mMyId))
@@ -1150,23 +1231,25 @@ public class MainActivity1 extends Activity
                 int pl = 2;
                 int score = mParticipantScore.containsKey(pid) ? mParticipantScore.get(pid) : 0;
 
-
                 ((TextView) findViewById(arr[i])).setText(formatScore(score) + " - " + p.getDisplayName() +
-                "\n lat - " + lat + "\n lng - " + lng + "\n Atstumas" + mDistance + "\n Oponento koordinates" + mOpponentCoord[0] + " " + mOpponentCoord[1]);
+                "\n lat - " + lat + "\n lng - " + lng + "\n" + "Komanda" /*+ String.valueOf(player.getTeam())*/ +
+                        "Oponentu koordinates" + mOpponentCoord[0] + " " + mOpponentCoord[1] + " Atstumas ");
                 ++i;
-                /////Cia klaida....
-                /*
-                ((TextView) findViewById(arr[i])).setText(formatScore(score) + " - " + players.get(i).getName() +
-                        "\n lat - " + players.get(i).getLatitude() + "\n lng - " + players.get(i).getLongitude() /*+ "\n Atstumas" + players.get(i).getDistance()*/ /*+ "\n Oponento koordinates" + mOpponentCoord[0] + " " + mOpponentCoord[1]);
-                ++i;
-                */
-               // opponentLat = mOpponentCoord[0];
-                //opponentLong = mOpponentCoord[1];
             }
         }
 
         for (; i < arr.length; ++i) {
             ((TextView) findViewById(arr[i])).setText("");
+        }
+    }
+
+    public static void printMap(Map mp) {
+        Iterator it = mp.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            //System.out.println(pair.getKey() + " = " + pair.getValue());
+            Log.i("PrintMap", pair.getKey() + " = " + pair.getValue());
+            it.remove(); // avoids a ConcurrentModificationException
         }
     }
 
@@ -1205,15 +1288,19 @@ public class MainActivity1 extends Activity
         mDistance = location.distanceTo(location2);
         if(mParticipants!= null){
             initialisePlayersData();
-        }
-        */
-        if(players.size() > 0){
+        }*/
+
+        /// TO DO padaryti objekta pleyerio 1232 eilutejes
+        if(onConnectedToRoom){
             for(int i = 0; i < players.size(); i++){
                 if(!players.get(i).getId().equals(mMyId)) {
                     Location location2 = new Location("locationB");
                     location2.setLatitude(players.get(i).getLatitude());
                     location2.setLongitude(players.get(i).getLongitude());
-                    players.get(i).setDistance(location.distanceTo(location2));
+                    Log.i("AtstumasOnLocation", location.distanceTo(location2) + "Zaidejo id" + players.get(i).getId() + " ManoID" + mMyId);
+                    player.addDistPlayers(players.get(i).getId(), location.distanceTo(location2));
+                    //Log.i("Atstumai", "Atstumai " + location.distanceTo(location2));
+                    //Log.i("Dydis", "Dydis " + player.getDistPlayers().size());
                 }
             }
         }
@@ -1550,6 +1637,14 @@ public class MainActivity1 extends Activity
         }
     }
     double accurancy = 30;
+    int width;
+    int height;
+    RelativeLayout rlMain;
+    RelativeLayout.LayoutParams params;
+    ImageView person;
+    double coord;
+    boolean personInView = false;
+    long myTime = 0;
 
     //Метод isBetween определяет, находится ли азимут в целевом диапазоне с учетом допустимых отклонений
     private boolean isBetween(double minAngle, double maxAngle, double azimuth) {
@@ -1557,8 +1652,26 @@ public class MainActivity1 extends Activity
             /*if (isBetween(0, maxAngle, azimuth) && isBetween(minAngle, 360, azimuth))
                 return true;*/
         } else {
-            if (azimuth > minAngle && azimuth < maxAngle)
-                return true;
+            if (azimuth > minAngle && azimuth < maxAngle) {
+                if (System.currentTimeMillis() - myTime > 100) {
+                    myTime = System.currentTimeMillis();
+                    if (personInView) {
+                        rlMain.removeView(person);
+                    }
+                    personInView = true;
+                    person = new ImageView(this);
+                    person.setImageResource(R.drawable.person);
+                    params = new RelativeLayout.LayoutParams(1090, 1090);// mastelis figuros
+                    params.topMargin = 650;
+                    coord = (azimuth - minAngle) * 1090 / (accurancy * 2);
+                    params.width = 200;
+                    params.height = 200;
+                    person.setMinimumWidth(200);
+                    params.leftMargin = (int) (coord - (545 / 2)); // per viduri ekrano,jei 0laipsniu paklaida
+                    rlMain.addView(person, params);
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -1584,5 +1697,12 @@ public class MainActivity1 extends Activity
             // KAS VYKDOMA, KAI GYVYBIU NELIEKA???
         }
     }
+
+    // pav vaizdavimas ekrane
+    private void drawPerson(){
+
+    }
+
+
 }
 

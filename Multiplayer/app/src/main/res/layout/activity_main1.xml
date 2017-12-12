@@ -48,11 +48,30 @@
         android:orientation="vertical"
         android:gravity="center_horizontal">
         <!--<TextView style="@style/GameTitle" />-->
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/radar1"
+            android:layout_marginLeft="-120dp"
+            android:layout_marginTop="20dp" />
+
+        <TextView
+            android:text="GAME"
+            android:textAlignment="center"
+            android:id="@+id/textView2"
+            android:textColor="@color/green"
+            android:layout_marginTop="60dp"
+            android:textSize="40dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:gravity="center_horizontal"/>
+
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:layout_marginTop="170dp">
+            android:layout_marginTop="50dp">
             <ImageButton
                 android:id="@+id/start_button"
                 android:src="@drawable/start"
@@ -75,6 +94,7 @@
                 android:layout_width="wrap_content"
                 android:layout_marginTop="70dp"
                 android:gravity="center_horizontal"/>
+
             <ImageButton
                 android:id="@+id/exit_button"
                 android:src="@drawable/exit"
@@ -209,24 +229,26 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-            <TextureView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/textureView"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                tools:ignore="ObsoleteLayoutParam">
-            </TextureView>
-
-            <ImageView
+            <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/radar"
+                android:id="@+id/layout"
+                android:layout_height="wrap_content">
+                <TextureView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/textureView"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    tools:ignore="ObsoleteLayoutParam">
+                </TextureView>
+            </RelativeLayout>
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:src="@drawable/radar1"
                 android:id="@+id/radar"
-                android:layout_alignParentLeft="true"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="16dp" />
+                android:layout_alignParentLeft="true" />
 
            <!-- <LinearLayout
                 android:layout_width="wrap_content"
@@ -235,34 +257,34 @@
                 android:layout_marginLeft="150dp"> -->
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_favorite_black_24dp"
+                    android:layout_width="72dp"
+                    android:layout_height="67dp"
+                    android:src="@drawable/heart"
                     android:id="@+id/heart1"
                     android:layout_alignParentRight="true"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginLeft="200dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginLeft="175dp"
                     android:outlineProvider="bounds"
                     tools:ignore="VectorDrawableCompat" />
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_favorite_black_24dp"
+                    android:layout_width="72dp"
+                    android:layout_height="67dp"
+                    android:src="@drawable/heart"
                     android:id="@+id/heart2"
                     android:layout_alignParentRight="true"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginLeft="250dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginLeft="230dp"
                     tools:ignore="VectorDrawableCompat" />
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_favorite_black_24dp"
+                    android:layout_width="72dp"
+                    android:layout_height="67dp"
+                    android:src="@drawable/heart"
                     android:id="@+id/heart3"
                     android:layout_alignParentRight="true"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginLeft="300dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginLeft="285dp"
                     tools:ignore="VectorDrawableCompat" />
            <!-- </LinearLayout> -->
 
@@ -334,13 +356,22 @@
                 android:layout_height="97dp"
                 android:layout_marginBottom="24dp"
                 android:layout_marginLeft="125dp"
-                android:layout_marginTop="510dp"
+                android:layout_marginTop="515dp"
                 android:adjustViewBounds="true"
                 android:padding="0dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/football"
+                android:src="@drawable/glossy_ball"
                 android:background="@null"
                 tools:ignore="RtlHardcoded" />
+            <ImageButton
+                android:id="@+id/action_map"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_alignParentTop="true"
+                android:layout_marginBottom="24dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="160dp"
+                android:background="@drawable/map" />
 
             <ImageView
                 android:id="@+id/imageView"
@@ -364,12 +395,13 @@
                 android:text="9"
                 android:textColor="@color/colorAccent"
                 android:layout_marginBottom="0dp"
-                android:layout_marginLeft="175dp"
-                android:layout_marginTop="520dp"
+                android:layout_marginLeft="174dp"
+                android:layout_marginTop="525dp"
                 android:adjustViewBounds="true"
                 android:textSize="55dp"/>
 
             <com.getbase.floatingactionbutton.FloatingActionsMenu
+                android:visibility="gone"
                 android:id="@+id/multiple_actions"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -382,7 +414,7 @@
                 tools:ignore="RtlHardcoded">
 
                 <com.getbase.floatingactionbutton.FloatingActionButton
-                    android:id="@+id/action_map"
+                    android:id="@+id/map"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     fab:fab_icon="@drawable/ic_location_on_black_24dp"

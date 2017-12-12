@@ -3,6 +3,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fab="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relative_layout"
     android:background="@color/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -30,7 +31,6 @@
             android:textColor="@color/colorPrimary"
             android:layout_marginLeft="16dp"
             android:layout_marginTop="150dp"
-
             android:id="@+id/textViewThrowing" />
 
         <Button
@@ -45,7 +45,7 @@
             android:layout_marginTop="285dp"/>
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/personView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="200dp"
@@ -86,79 +86,80 @@
             android:textColor="@color/colorAccent"
             android:textSize="55dp" />
 
-        <ImageButton
-            android:id="@+id/map"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_alignParentTop="true"
-            android:layout_marginBottom="24dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="180dp"
-            android:background="@drawable/map" />
-    </FrameLayout>
+    <!-- -pakeisti activity i ImageButton-->
+    <ImageButton
+        android:id="@+id/action_map"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="24dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="160dp"
+        android:background="@drawable/map" />
+</FrameLayout>
+
+<ImageView
+    android:layout_width="150dp"
+    android:layout_height="150dp"
+    android:background="@drawable/radar1"
+    android:id="@+id/radar"
+    android:layout_marginLeft="16dp"
+    android:layout_marginStart="11dp"
+    android:layout_alignParentTop="true"
+    android:layout_alignParentStart="true" />
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        fab:srcCompat="@drawable/radar1"
-        android:id="@+id/radar"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="11dp"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:background="@drawable/blip"
+        android:id="@+id/blip"
+
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true" />
+
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="16dp"
-        android:id="@+id/linearLayout"
-        android:layout_below="@+id/firstBar"
-        android:layout_centerHorizontal="true">
+        android:layout_marginTop="-16dp">
 
         <ImageView
-            android:id="@+id/heart1"
             android:layout_width="72dp"
             android:layout_height="67dp"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="0dp"
-            android:outlineProvider="bounds"
             fab:srcCompat="@drawable/heart"
-            tools:ignore="VectorDrawableCompat" />
-
-        <ImageView
-            android:id="@+id/heart2"
-            android:layout_width="72dp"
-            android:layout_height="67dp"
-            android:outlineProvider="bounds"
-            fab:srcCompat="@drawable/heart"
-            tools:ignore="VectorDrawableCompat"
-            android:layout_alignParentTop="true"
-            android:layout_toStartOf="@+id/heart1"
-            android:layout_marginEnd="32dp" />
-
-        <ImageView
             android:id="@+id/heart3"
+            android:layout_marginLeft="275dp"
+            android:layout_marginTop="16dp" />
+
+        <ImageView
             android:layout_width="72dp"
             android:layout_height="67dp"
-            android:outlineProvider="bounds"
             fab:srcCompat="@drawable/heart"
-            tools:ignore="VectorDrawableCompat"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="52dp" />
+            android:id="@+id/heart2"
+            android:layout_marginLeft="215dp"
+            android:layout_marginTop="16dp" />
+
+        <ImageView
+            android:layout_width="72dp"
+            android:layout_height="67dp"
+            fab:srcCompat="@drawable/heart"
+            android:id="@+id/heart1"
+            android:layout_marginLeft="155dp"
+            android:layout_marginTop="16dp" />
     </RelativeLayout>
 
-    <ProgressBar
-        android:id="@+id/firstBar"
-        android:layout_width="200dp"
-        android:layout_marginRight="35dp"
-        android:layout_marginTop="100dp"
-        android:layout_centerHorizontal="true"
-        style="@android:style/Widget.ProgressBar.Horizontal"
-        android:visibility="gone"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/radar" />
-    <!-- android:progressDrawable="@drawable/custom_progress" -->
+<ProgressBar
+    android:id="@+id/firstBar"
+    android:layout_width="200dp"
+    android:layout_marginRight="35dp"
+    android:layout_marginTop="100dp"
+    android:layout_centerHorizontal="true"
+    style="@android:style/Widget.ProgressBar.Horizontal"
+    android:visibility="gone"
+    android:layout_height="wrap_content"
+    android:layout_alignTop="@+id/radar" />
+<!-- android:progressDrawable="@drawable/custom_progress" -->
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/multiple_actions"
@@ -174,7 +175,7 @@
         fab:fab_addButtonPlusIconColor="@color/yellow">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/action_map"
+            android:id="@+id/action_map1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_icon="@drawable/ic_location_on_black_24dp"

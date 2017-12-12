@@ -347,10 +347,12 @@ import android.util.Size;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -394,6 +396,13 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
     private ImageView heart1;
     private ImageView heart2;
     private ImageView heart3;
+
+    private ImageButton mapButton;
+    private ImageView personView;
+    private float[] mValues = new float[3];
+    RelativeLayout.LayoutParams params;
+    ImageView person;
+    RelativeLayout rlMain;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -462,7 +471,7 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
         mTextureView = (TextureView) findViewById(R.id.textureView);
         mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
 
-        final FloatingActionButton mapAction = (FloatingActionButton) findViewById(R.id.action_map);
+        final FloatingActionButton mapAction = (FloatingActionButton) findViewById(R.id.action_map1);
         mapAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -471,6 +480,30 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
                 startActivity(homeIntent);
             }
         });
+
+        mapButton = (ImageButton) findViewById(R.id.action_map);
+        mapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /// MAP INTENT
+                Intent homeIntent = new Intent(Camera2Activity.this, MapsActivity.class);
+                startActivity(homeIntent);
+            }
+        });
+
+        ///////////////////////////////////////////////
+        rlMain = (RelativeLayout) findViewById(R.id.relative_layout);
+        int width = getWindowManager().getDefaultDisplay().getWidth();
+        int height = getWindowManager().getDefaultDisplay().getHeight();
+
+        person = new ImageView(this);
+        person.setImageResource(R.drawable.person);
+        params = new RelativeLayout.LayoutParams(380, 380);// mastelis figuros
+        params.topMargin = 50;
+        params.leftMargin = (width/2) - (380/2); // per viduri ekrano,jei 0laipsniu paklaida
+        rlMain.addView(person, params);
+
+        Log.i("Dydis", width + " ir " + height);
     }
 
     static class CompareSizesByArea implements Comparator<Size> {
@@ -641,6 +674,7 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
     float distanceBetweenMyOpponent; // rasti kas yra toje kriptyje, imti kuris yra arciausiai arba klausi zaidejo i kuri taikomasi
     float throwingMinDistance; // atstumas paskaiciuotas taip, kad max negaletu buti daugiau nei 200 (MAX_THROW_DISTANCE)
     float throwingMaxDistance;
+
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor mySensor = sensorEvent.sensor;
@@ -650,6 +684,15 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
             float z = sensorEvent.values[2];
 
             long curTime = System.currentTimeMillis();
+            long myTime = 0;
+
+            /*if (System.currentTimeMillis() - myTime > 1000) {
+                myTime = System.currentTimeMillis();
+                rlMain.removeView(person);
+                params.topMargin = (int) (y * 100);
+                params.leftMargin = (int) (x * 100);
+                rlMain.addView(person, params);
+            }*/
 
             // 1 budas
             if(last_x > x && (last_x <= 0 && x <= 0 && last_x - x > 0.5) && !doneDown && pressedThrow && !throwUp && !wasUp){ // atgal
