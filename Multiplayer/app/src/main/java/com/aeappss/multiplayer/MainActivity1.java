@@ -83,6 +83,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import static com.aeappss.multiplayer.R.id.blip;
 import static java.lang.Math.abs;
 
 /**
@@ -814,6 +815,7 @@ public class MainActivity1 extends Activity
         }
     }
 
+    ImageView radar;
     // Start the gameplay phase of the game.
     void startGame(boolean multiplayer) {
         mMultiplayer = multiplayer;
@@ -829,6 +831,15 @@ public class MainActivity1 extends Activity
         params.topMargin = 50;
         params.leftMargin = 540 - (380/2); // per viduri ekrano,jei 0laipsniu paklaida
         rlMain.addView(person, params);*/
+        radar = new ImageView(this);
+        radar.setImageResource(R.drawable.radar1);
+        params = new RelativeLayout.LayoutParams(1090, 1090);// mastelis figuros
+        params.topMargin = 10;
+        params.width = 500;
+        params.height = 400;
+        radar.setMinimumWidth(200);
+        params.rightMargin = 0; // per viduri ekrano,jei 0laipsniu paklaida
+        rlMain.addView(radar, params);
 
 
         switchToScreen(R.id.screen_game);
@@ -1634,8 +1645,41 @@ public class MainActivity1 extends Activity
                     //arText.setVisibility(View.INVISIBLE);
                     personImage.setVisibility(View.INVISIBLE);
                 }
+            // piesti blip cia
+            double xPos, yPos;
+            double dist;
+            dist = mDistance;  // nebus sugadintas mDistance????????????????????????????????????????????????
+            if(dist > 70)
+                dist = 70;
+
+            xPos = Math.sin(Math.toRadians(mAzimuth)) * dist;
+            yPos = Math.sqrt(Math.pow(dist, 2) - Math.pow(xPos, 2));
+            if (mAzimuth > 90 && mAzimuth < 270)
+                yPos *= -1;
+
+            if (System.currentTimeMillis() - blipTime > 100) {
+                blipTime = System.currentTimeMillis();
+                if (blipInView) {
+                    rlMain.removeView(blip);
+                }
+                blipInView = true;
+                blip = new ImageView(this);
+                blip.setImageResource(R.drawable.blip);
+                params = new RelativeLayout.LayoutParams(20, 20);// mastelis figuros
+                // center
+                Log.i("XPOS", String.valueOf(centerY - yPos*10));
+                Log.i("XPOS", String.valueOf(centerX + xPos*10));
+                params.topMargin = (int) (centerY - yPos*100); // y koord
+                params.leftMargin = (int) (centerX + xPos*100); // x koord
+                rlMain.addView(blip, params);
+            }
         }
     }
+    double centerX = 240;
+    double centerY = 200;
+    long blipTime = 0;
+    ImageView blip;
+    boolean blipInView = false;
     double accurancy = 30;
     int width;
     int height;

@@ -247,8 +247,18 @@
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:src="@drawable/radar1"
+                android:visibility="gone"
                 android:id="@+id/radar"
                 android:layout_alignParentLeft="true" />
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/blip"
+                android:layout_marginTop="200dp"
+                android:id="@+id/blip"
+
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true" />
 
            <!-- <LinearLayout
                 android:layout_width="wrap_content"
@@ -370,7 +380,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_marginBottom="24dp"
                 android:layout_marginStart="10dp"
-                android:layout_marginTop="160dp"
+                android:layout_marginTop="140dp"
                 android:background="@drawable/map" />
 
             <ImageView

@@ -365,6 +365,7 @@ import java.util.List;
 
 import android.content.Intent;
 
+import static com.aeappss.multiplayer.R.id.blip;
 import static java.lang.Math.abs;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -402,6 +403,7 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
     private float[] mValues = new float[3];
     RelativeLayout.LayoutParams params;
     ImageView person;
+    ImageView blip;
     RelativeLayout rlMain;
 
     @Override
@@ -497,14 +499,22 @@ public class Camera2Activity extends AppCompatActivity implements SensorEventLis
         int height = getWindowManager().getDefaultDisplay().getHeight();
 
         person = new ImageView(this);
+        blip = new ImageView(this);
+        blip.setImageResource(R.drawable.blip);
         person.setImageResource(R.drawable.person);
         params = new RelativeLayout.LayoutParams(380, 380);// mastelis figuros
         params.topMargin = 50;
         params.leftMargin = (width/2) - (380/2); // per viduri ekrano,jei 0laipsniu paklaida
         rlMain.addView(person, params);
+        params = new RelativeLayout.LayoutParams(30, 30);// mastelis figuros
+        // center
+        params.topMargin = height/10+15; // y koord
+        params.leftMargin = width/5+25; // x koord per viduri ekrano,jei 0laipsniu paklaida
+        rlMain.addView(blip, params);
 
         Log.i("Dydis", width + " ir " + height);
     }
+
 
     static class CompareSizesByArea implements Comparator<Size> {
         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
