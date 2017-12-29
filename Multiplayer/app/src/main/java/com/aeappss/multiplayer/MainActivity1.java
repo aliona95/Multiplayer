@@ -162,7 +162,7 @@ public class MainActivity1 extends Activity
     String mIncomingInvitationId = null;
 
     // Message buffer for sending messages
-    byte[] mMsgBuf = new byte[50];
+    byte[] mMsgBuf = new byte[100];
     private Location location;
 
     public static ArrayList<Player> players = new ArrayList<>(); //all opponents except player
@@ -547,47 +547,21 @@ public class MainActivity1 extends Activity
         }
 
         location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
         if (location != null) {
             lat = (float) location.getLatitude();
             lng = (float) location.getLongitude();
         }
 
-        //Log.i("Paklaida", " " + location.getAccuracy());   //////////////////////////////////////////////////////////////////////
-       // Toast.makeText(this, "ACCURANCY onConnected " + location.getAccuracy(), Toast.LENGTH_LONG).show();
-        // Test: Daistance between two points
         /*
-        Location location1 =new Location("locationA");
-        location1.setLatitude(54.98371);
-        location1.setLongitude(25.777924);
-        Location location2=new Location("locationA");
-        location2.setLatitude(54.984543);
-        location2.setLongitude(25.777504);
-        double distance = location1.distanceTo(location2);
-        Log.i("Distance", "Atstumas tarp tasku" + distance);
-        */
-
         float[] distance = new float[1];
         Location.distanceBetween(54.98371, 25.777924, 54.984543, 25.777504, distance);
         Log.i("Distance", "Atstumas tarp tasku" + distance[0]);
+        */
         /*
         double distance = meterDistanceBetweenPoints(54.984543, 25.777504,54.990257, 25.779566 );
         Log.i("Distance", "Atstumas tarp tasku" + distance);
         */
-    }
-    private double meterDistanceBetweenPoints(double lat_a, double lng_a, double lat_b, double lng_b) {
-        float pk = (float) (180.f/Math.PI);
-
-        double a1 = lat_a / pk;
-        double a2 = lng_a / pk;
-        double b1 = lat_b / pk;
-        double b2 = lng_b / pk;
-
-        double t1 = Math.cos(a1) * Math.cos(a2) * Math.cos(b1) * Math.cos(b2);
-        double t2 = Math.cos(a1) * Math.sin(a2) * Math.cos(b1) * Math.sin(b2);
-        double t3 = Math.sin(a1) * Math.sin(b1);
-        double tt = Math.acos(t1 + t2 + t3);
-
-        return 6366000 * tt;
     }
 
     @Override
@@ -637,6 +611,7 @@ public class MainActivity1 extends Activity
 
         initialisePlayersData();
         onConnectedToRoom = true;
+
     }
 
     // Called when we've successfully left the room (this happens a result of voluntarily leaving
@@ -783,26 +758,41 @@ public class MainActivity1 extends Activity
 
     //This method is used to create Players.
     void initialisePlayersData(){
-        //players.clear();
-            for(int i = 0; i < mParticipants.size(); i++){
-                Log.i("UZEJO ", String.valueOf(mMyId));
-                if(mParticipants.get(i).getParticipantId().equals(mMyId)){
-                    player = new Player();
-                    player.setName(mParticipants.get(i).getDisplayName());
-                    player.setImageUrl(mParticipants.get(i).getIconImageUrl());
-                    player.setId(mParticipants.get(i).getParticipantId());
-                    Random r = new Random();
-                    char c = (char)(r.nextInt(1) + 'A');
-                    player.setTeam(c);
-                    Log.i("UZEJO ", "AAA");
+        Log.i("mParticipantsSize", " "  + mParticipants.size());
+        for(int i = 0; i < mParticipants.size(); i++){
+            if(mMyId.equals(mParticipants.get(i).getParticipantId())){
+                player = new Player();
+                player.setName(mParticipants.get(i).getDisplayName());
+                player.setImageUrl(mParticipants.get(i).getIconImageUrl());
+                player.setId(mParticipants.get(i).getParticipantId());
+                int team = mMyId.charAt(mMyId.length() - 1) - 65;
+                Log.i("PlayerTeam", mMyId +  " " + team);
+                if((team % 2) == 0){
+                    Log.i("PlayerTeam", "A");
+                    player.setTeam("A");
                 }else{
-                    Player player = new Player();
-                    player.setName(mParticipants.get(i).getDisplayName());
-                    player.setImageUrl(mParticipants.get(i).getIconImageUrl());
-                    player.setId(mParticipants.get(i).getParticipantId());
-                    players.add(player);
+                    Log.i("PlayerTeam", "B");
+                    player.setTeam("B");
                 }
+                Log.i("InitPlayerData", player.toString());
+            }else {
+                Player player = new Player();
+                player.setName(mParticipants.get(i).getDisplayName());
+                player.setImageUrl(mParticipants.get(i).getIconImageUrl());
+                player.setId(mParticipants.get(i).getParticipantId());
+                int team = mParticipants.get(i).getParticipantId().charAt(mParticipants.get(i).getParticipantId().length() - 1) - 65;
+                Log.i("PlayerTeam",  mParticipants.get(i).getParticipantId() +  " " + team);
+                if((team % 2) == 0){
+                    Log.i("PlayerTeam", "A");
+                    player.setTeam("A");
+                }else{
+                    Log.i("PlayerTeam", "B");
+                    player.setTeam("B");
+                }
+                Log.i("InitPlayersData", player.toString());
+                players.add(player);
             }
+        }
     }
 
     //This method is used to update Player coordinates.
@@ -985,8 +975,6 @@ public class MainActivity1 extends Activity
             int existingScore = mParticipantScore.containsKey(sender) ? mParticipantScore.get(sender) : 0;
             int thisScore = (int) buf[1];
 
-            //TO DO: more than one player
-            // Get parcipant coordinate (latitude) from buffer
             byte [] temp = new byte[8];
             for (int i = 2; i <  buf.length; i++) {
                 if(i == 10){
@@ -1004,7 +992,6 @@ public class MainActivity1 extends Activity
                 temp2[i - 10] = buf[i];
             }
 
-            //Log.i("Float", "float" + mOpponentCoord[1]);
             //Check if player was hit
             if(buf[18] == 'H'){
                 Log.d(TAG, "Player was hit");
@@ -1016,14 +1003,32 @@ public class MainActivity1 extends Activity
             //Get id player to recognized it.
             String id = "";
             for(int i = 19; i < buf.length; i++){
+                if(i == mMyId.length() + 19){
+                    break;
+                }
                 id += (char) buf[i];
             }
+
+            // Get player team
+            String team = "";
+            team += (char) buf[mMyId.length() + 19];
+
+            for(int i = 0; i < players.size(); i++){
+                Log.i("ZaidejuInfo", players.get(i).toString());
+            }
+            Log.i("ZaidejuInfo", player.toString());
+
+            /*
+            Log.i("ZaidejuID",id + " " + mParticipants.get(1).getParticipantId() + " " + mParticipants.get(1).getDisplayName() + " "
+            + team  + " ManoId" + mMyId + " Mano teamas " + player.getTeam());
+            */
+            /*
             String opponentId = id.substring(0, 17);
             Log.i("ZaidejuID", mParticipants.get(0).getParticipantId() + " " + mParticipants.get(0).getDisplayName() + "\n" +  mParticipants.get(1).getParticipantId() + " " + mParticipants.get(1).getDisplayName() +  "\n"
             +mMyId + "\n" + id + "\n" + players.size() + " \n" + players.get(0).getId());
-            Log.i("ZaidejoId", mMyId  + " \n" + id);
+            //Log.i("ZaidejoId", mMyId  + " \n" + id);
             for(int j = 0; j < players.size(); j++){
-                if(players.get(j).getId().equals(id)){
+                if(players.get(j).getId().equals(opponentId)){
                     //Log.i("IFAS", id  + " \n" + opponentId);
                     Log.i("Coord", ByteBuffer.wrap(temp).getDouble() + " " + ByteBuffer.wrap(temp2).getDouble());
                     players.get(j).setLongitude(ByteBuffer.wrap(temp2).getDouble());
@@ -1031,10 +1036,14 @@ public class MainActivity1 extends Activity
 
                 }
             }
+            */
 
             ///Log.i("OpponentId", buf[19]);
+            /*
             mOpponentCoord[0] = ByteBuffer.wrap(temp).getDouble(); // Lattitude
             mOpponentCoord[1] = ByteBuffer.wrap(temp2).getDouble();// Longitude
+            */
+            initialisePlayersData(ByteBuffer.wrap(temp).getDouble(),ByteBuffer.wrap(temp2).getDouble(), id);
 
             if (thisScore > existingScore) {
                 // this check is necessary because packets may arrive out of
@@ -1072,8 +1081,6 @@ public class MainActivity1 extends Activity
 
     // Broadcast my score to everybody else.
     void broadcastScore(boolean finalScore) {
-        //Initialise player data
-       // initialisePlayersData();
         if (!mMultiplayer)
             return; // playing single-player mode
 
@@ -1084,7 +1091,6 @@ public class MainActivity1 extends Activity
         mMsgBuf[1] = (byte) mScore;
 
         // Add paricipiant coordinate (lattitude) to buffer.
-
         byte[] tempBytes = new byte[8];
         ByteBuffer.wrap(tempBytes).putDouble(lat);
         for (int i = 0; i <  tempBytes.length; i++){
@@ -1092,7 +1098,6 @@ public class MainActivity1 extends Activity
         }
 
         // Add paricipiant coordinate (longitude) to buffer.
-        byte[] tempBytes2 = new byte[8];
         ByteBuffer.wrap(tempBytes).putDouble(lng);
         for (int i = 0; i <  tempBytes.length; i++){
             mMsgBuf[i + 10] = tempBytes[i];
@@ -1101,10 +1106,31 @@ public class MainActivity1 extends Activity
         // if player hit opponent
         mMsgBuf[18] = (byte) hit;
 
+        // player ID
         byte [] bytes = mMyId.getBytes();
-        for(int i = 0; i < bytes.length - 1; i++){
+        for(int i = 0; i < bytes.length; i++){
+            if(i == mMyId.length()){
+                break;
+            }
             mMsgBuf[19 + i] = bytes[i];
         }
+
+        // player team
+        String team = player.getTeam();
+        byte [] bytes2 = team.getBytes();
+        for(int i = 0; i < bytes2.length; i++){
+            mMsgBuf[19 + mMyId.length() + i] = bytes2[i];
+        }
+
+        // for debugging
+        /*
+        Log.i("PlayerID", mMyId);
+        String idPlayer = "";
+        for(int j = 19; j < mMsgBuf.length; j++){
+            idPlayer += (char) mMsgBuf[j];
+        }
+        Log.i("PlayerID", idPlayer);
+        */
 
         // Send to every other participant.
         for (Participant p : mParticipants) {
@@ -1232,7 +1258,7 @@ public class MainActivity1 extends Activity
         */
 
         if (mRoomId != null) {
-            printMap(player.getDistPlayers());
+            //printMap(player.getDistPlayers());
             for (Participant p : mParticipants) {
                 String pid = p.getParticipantId();
                 if (pid.equals(mMyId))
@@ -1241,11 +1267,13 @@ public class MainActivity1 extends Activity
                     continue;
                 int pl = 2;
                 int score = mParticipantScore.containsKey(pid) ? mParticipantScore.get(pid) : 0;
-
+                 /*
                 ((TextView) findViewById(arr[i])).setText(formatScore(score) + " - " + p.getDisplayName() +
-                "\n lat - " + lat + "\n lng - " + lng + "\n" + "Komanda" /*+ String.valueOf(player.getTeam())*/ +
-                        "Oponentu koordinates" + mOpponentCoord[0] + " " + mOpponentCoord[1] + " Atstumas ");
-                ++i;
+                "\n lat - " + lat + "\n lng - " + lng + "\n" + "Komanda" /*+ String.valueOf(player.getTeam())*/ //+
+                //        "Oponentu koordinates" + mOpponentCoord[0] + " " + mOpponentCoord[1] + " Atstumas ");
+
+               // ++i;
+
             }
         }
 
@@ -1286,33 +1314,19 @@ public class MainActivity1 extends Activity
     public void onLocationChanged(Location location) {
         lat =  location.getLatitude();
         lng =  location.getLongitude();
-        //Log.d(TAG, "Kordinates: " +  lat + "," + lng);
-        //Toast.makeText(this, "Kordinates - " + lat + " , " + lng, Toast.LENGTH_LONG).show();
-        //Log.i("Paklaida", " " + location.getAccuracy());
-        //Toast.makeText(this, "ACCURANCY " + location.getAccuracy(), Toast.LENGTH_LONG).show();
 
-        // Canculate distance between players.
-        /*
-        Location location2 = new Location("locationB");
-        location2.setLatitude(mOpponentCoord[0]);
-        location2.setLongitude(mOpponentCoord[1]);
-        mDistance = location.distanceTo(location2);
-        if(mParticipants!= null){
-            initialisePlayersData();
-        }*/
-
-        /// TO DO padaryti objekta pleyerio 1232 eilutejes
         if(onConnectedToRoom){
+            player.setLatitude(lat);
+            player.setLongitude(lng);
             for(int i = 0; i < players.size(); i++){
-                if(!players.get(i).getId().equals(mMyId)) {
-                    Location location2 = new Location("locationB");
-                    location2.setLatitude(players.get(i).getLatitude());
-                    location2.setLongitude(players.get(i).getLongitude());
-                    Log.i("AtstumasOnLocation", location.distanceTo(location2) + "Zaidejo id" + players.get(i).getId() + " ManoID" + mMyId);
-                    player.addDistPlayers(players.get(i).getId(), location.distanceTo(location2));
-                    //Log.i("Atstumai", "Atstumai " + location.distanceTo(location2));
-                    //Log.i("Dydis", "Dydis " + player.getDistPlayers().size());
-                }
+                Location location2 = new Location("locationB");
+                location2.setLatitude(players.get(i).getLatitude());
+                location2.setLongitude(players.get(i).getLongitude());
+                players.get(i).setDistance(location.distanceTo(location2));
+                Log.i("ATSTUMAS", players.get(i).getName() + " "+ "lat " +
+                players.get(i).getLatitude() + " lng " + players.get(i).getLongitude() + "\n" +
+                "AS " + player.getName() + " lat " + player.getLatitude() + "lng " + player.getLongitude()
+                + "\n Atstumas"  + players.get(i).getDistance());
             }
         }
     }
@@ -1603,6 +1617,9 @@ public class MainActivity1 extends Activity
                 }
             }
         }else if (mySensor.getType() == Sensor.TYPE_ROTATION_VECTOR && mCurScreen == R.id.screen_game) {
+            // paduodamas angle su n-1 zaidejais
+            // turi nupiesti n-1 blip'u kiekviena karta
+            
                 // calculate th rotation matrix
                 SensorManager.getRotationMatrixFromVector( rMat, sensorEvent.values );
                 // get the azimuth value (orientation[0]) in degree
@@ -1657,6 +1674,10 @@ public class MainActivity1 extends Activity
             if (mAzimuth > 90 && mAzimuth < 270)
                 yPos *= -1;
 
+            // blip'u vaizdavimas radare
+            // raudoni - priesininkai
+            // balti - tos pacios komandos nariai
+            // patikrinti is kurios komandos, gauti koord ir vaizduoti visus vienu metu (be saves)
             if (System.currentTimeMillis() - blipTime > 100) {
                 blipTime = System.currentTimeMillis();
                 if (blipInView) {
@@ -1664,7 +1685,7 @@ public class MainActivity1 extends Activity
                 }
                 blipInView = true;
                 blip = new ImageView(this);
-                blip.setImageResource(R.drawable.blip);
+                blip.setImageResource(R.drawable.redblip);
                 params = new RelativeLayout.LayoutParams(20, 20);// mastelis figuros
                 // center
                 Log.i("XPOS", String.valueOf(centerY - yPos*10));
@@ -1746,7 +1767,6 @@ public class MainActivity1 extends Activity
     private void drawPerson(){
 
     }
-
 
 }
 

@@ -12,41 +12,25 @@ public class Player {
     private String name;
     private double latitude = 0; //default
     private double longitude = 0; //default
-    private HashMap<String,Float> distPlayers = new HashMap<>();
-    private char team;
+    private double distance = 0; //default
+    private String team;
 
-    public char getTeam() {
+    public String getTeam() {
         return team;
     }
 
-    public void  setTeam(char team) {
+    public void  setTeam(String team) {
         this.team = team;
     }
 
-    public void setDistPlayers(HashMap<String, Float> distPlayers) {
-        this.distPlayers = distPlayers;
-    }
-
-    Player(){
-        distPlayers = new HashMap<>();
-    }
-    public HashMap<String, Float> getDistPlayers() {
-        return distPlayers;
-    }
-
-    public void addDistPlayers(String id, float distance) {
-        distPlayers.put(id,distance);
-    }
-
-    public float getDistance() {
+    public double getDistance() {
         return distance;
     }
 
-    public void setDistance(float distance) {
+    public void setDistance(double distance) {
         this.distance = distance;
     }
 
-    private float distance = 0; //default
 
     public String getId() {
         return id;
@@ -100,5 +84,9 @@ public class Player {
 
     public String getImageUrl() {
         return imageUrl;
+    }
+
+    public String toString(){
+        return name +  " " + id + " " + team;
     }
 }

@@ -10,7 +10,7 @@
 
 
     <color name="AccentColor">#cc0000</color>
-    <color name="PopupColor">@color/AccentColor</color>
+    <color name="PopupColor">@color/colorAccent</color>
     <color name="PopupTextColor">#ffffff</color>
     <color name="ButtonTextColor">#ffffff</color>
     <color name="BlurbColor">#1b5e20</color> <!-- #a0a0a0 -->
