@@ -8,8 +8,15 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -24,6 +31,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.HandlerThread;
@@ -35,6 +43,11 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -71,6 +84,7 @@ import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.example.games.basegameutils.BaseGameUtils;
 
 import java.util.Arrays;
@@ -83,7 +97,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import static android.R.attr.bitmap;
 import static com.aeappss.multiplayer.R.id.blip;
+import static com.aeappss.multiplayer.R.id.imageView;
 import static java.lang.Math.abs;
 
 /**
@@ -756,6 +772,18 @@ public class MainActivity1 extends Activity
         mFinishedParticipants.clear();
     }
 
+    public String setTeam(String id){
+        for(int i = 0; i < mParticipants.size(); i++){
+            if(id.equals(mParticipants.get(i).getParticipantId())){
+                if(i % 2 == 0){
+                    return "A";
+                }else{
+                    return  "B";
+                }
+            }
+        }
+        return "NULL";
+    }
     //This method is used to create Players.
     void initialisePlayersData(){
         Log.i("mParticipantsSize", " "  + mParticipants.size());
@@ -765,31 +793,14 @@ public class MainActivity1 extends Activity
                 player.setName(mParticipants.get(i).getDisplayName());
                 player.setImageUrl(mParticipants.get(i).getIconImageUrl());
                 player.setId(mParticipants.get(i).getParticipantId());
-                int team = mMyId.charAt(mMyId.length() - 1) - 65;
-                Log.i("PlayerTeam", mMyId +  " " + team);
-                if((team % 2) == 0){
-                    Log.i("PlayerTeam", "A");
-                    player.setTeam("A");
-                }else{
-                    Log.i("PlayerTeam", "B");
-                    player.setTeam("B");
-                }
+                player.setTeam(setTeam(mMyId));
                 Log.i("InitPlayerData", player.toString());
             }else {
                 Player player = new Player();
                 player.setName(mParticipants.get(i).getDisplayName());
                 player.setImageUrl(mParticipants.get(i).getIconImageUrl());
                 player.setId(mParticipants.get(i).getParticipantId());
-                int team = mParticipants.get(i).getParticipantId().charAt(mParticipants.get(i).getParticipantId().length() - 1) - 65;
-                Log.i("PlayerTeam",  mParticipants.get(i).getParticipantId() +  " " + team);
-                if((team % 2) == 0){
-                    Log.i("PlayerTeam", "A");
-                    player.setTeam("A");
-                }else{
-                    Log.i("PlayerTeam", "B");
-                    player.setTeam("B");
-                }
-                Log.i("InitPlayersData", player.toString());
+                player.setTeam(setTeam(mParticipants.get(i).getParticipantId()));
                 players.add(player);
             }
         }
@@ -835,7 +846,7 @@ public class MainActivity1 extends Activity
         switchToScreen(R.id.screen_game);
         findViewById(R.id.button_click_me).setVisibility(View.VISIBLE);
         arText = (TextView) findViewById(R.id.ARtext);
-        personImage = (ImageView) findViewById(R.id.imageView);
+        personImage = (ImageView) findViewById(imageView);
 
         // run the gameTick() method every second to update the game.
         final Handler h = new Handler();
@@ -1022,28 +1033,30 @@ public class MainActivity1 extends Activity
             Log.i("ZaidejuID",id + " " + mParticipants.get(1).getParticipantId() + " " + mParticipants.get(1).getDisplayName() + " "
             + team  + " ManoId" + mMyId + " Mano teamas " + player.getTeam());
             */
-            /*
-            String opponentId = id.substring(0, 17);
-            Log.i("ZaidejuID", mParticipants.get(0).getParticipantId() + " " + mParticipants.get(0).getDisplayName() + "\n" +  mParticipants.get(1).getParticipantId() + " " + mParticipants.get(1).getDisplayName() +  "\n"
-            +mMyId + "\n" + id + "\n" + players.size() + " \n" + players.get(0).getId());
-            //Log.i("ZaidejoId", mMyId  + " \n" + id);
-            for(int j = 0; j < players.size(); j++){
-                if(players.get(j).getId().equals(opponentId)){
-                    //Log.i("IFAS", id  + " \n" + opponentId);
-                    Log.i("Coord", ByteBuffer.wrap(temp).getDouble() + " " + ByteBuffer.wrap(temp2).getDouble());
-                    players.get(j).setLongitude(ByteBuffer.wrap(temp2).getDouble());
-                    players.get(j).setLatitude(ByteBuffer.wrap(temp).getDouble());
 
-                }
-            }
-            */
-
-            ///Log.i("OpponentId", buf[19]);
-            /*
             mOpponentCoord[0] = ByteBuffer.wrap(temp).getDouble(); // Lattitude
             mOpponentCoord[1] = ByteBuffer.wrap(temp2).getDouble();// Longitude
-            */
+
+            Log.i("Koordinates", "Mano" + lat +  " " + lng +  " Oponento "  + mOpponentCoord[0] +  " "  + mOpponentCoord[1]);
             initialisePlayersData(ByteBuffer.wrap(temp).getDouble(),ByteBuffer.wrap(temp2).getDouble(), id);
+
+            if(onConnectedToRoom){
+                ///Log.i("Lokacija", lat + " " + lng);
+                player.setLatitude(lat);
+                player.setLongitude(lng);
+                for(int i = 0; i < players.size(); i++){
+                    Log.i("LokacijaP", " " + i  +  " "+ players.get(i).getLatitude() + " " + players.get(i).getLongitude());
+                    Location location2 = new Location("locationB");
+                    location2.setLatitude(players.get(i).getLatitude());
+                    location2.setLongitude(players.get(i).getLongitude());
+                    mDistance  = location.distanceTo(location2);
+                    players.get(i).setDistance(location.distanceTo(location2));
+                    Log.i("ATSTUMAS", players.get(i).getName() + " "+ "lat " +
+                            players.get(i).getLatitude() + " lng " + players.get(i).getLongitude() + "\n" +
+                            "AS " + player.getName() + " lat " + player.getLatitude() + "lng " + player.getLongitude()
+                            + "\n" + "Atstumas"  + players.get(i).getDistance());
+                }
+            }
 
             if (thisScore > existingScore) {
                 // this check is necessary because packets may arrive out of
@@ -1219,7 +1232,12 @@ public class MainActivity1 extends Activity
     // updates the screen with the scores from our peers
     public static  boolean peer = false;
     void updatePeerScoresDisplay() {
-        ((TextView) findViewById(R.id.score0)).setText(formatScore(mScore) + " - Me");
+        String teams = "";
+
+        if(onConnectedToRoom){
+            ((TextView) findViewById(R.id.score0)).setText("\n" + formatScore(mScore) + " - Me " + player.getTeam());
+        }
+
         int[] arr = {
                 R.id.score1, R.id.score2, R.id.score3
         };
@@ -1267,12 +1285,18 @@ public class MainActivity1 extends Activity
                     continue;
                 int pl = 2;
                 int score = mParticipantScore.containsKey(pid) ? mParticipantScore.get(pid) : 0;
-                 /*
-                ((TextView) findViewById(arr[i])).setText(formatScore(score) + " - " + p.getDisplayName() +
-                "\n lat - " + lat + "\n lng - " + lng + "\n" + "Komanda" /*+ String.valueOf(player.getTeam())*/ //+
-                //        "Oponentu koordinates" + mOpponentCoord[0] + " " + mOpponentCoord[1] + " Atstumas ");
 
-               // ++i;
+                if(onConnectedToRoom){
+                    ((TextView) findViewById(arr[i])).setText(players.get(i).getName() +
+                            "\n lat - " + players.get(i).getLatitude() + "\n lng - " + players.get(i).getLongitude()
+                            +  "\n"  + "Atstumas "  + players.get(i).getDistance());
+                }
+
+                        /*
+                        "Oponentu koordinates" + players.get(i).getLatitude() + " " + players.get(i).getLongitude()
+                        + " Atstumas "  + players.get(i).getDistance());*/
+
+                 ++i;
 
             }
         }
@@ -1314,14 +1338,19 @@ public class MainActivity1 extends Activity
     public void onLocationChanged(Location location) {
         lat =  location.getLatitude();
         lng =  location.getLongitude();
-
+        //Log.i("Lokacija", lat + " " + lng);
+        Toast.makeText(this, "" + lat + " " + lng, Toast.LENGTH_LONG).show();
+        /*
         if(onConnectedToRoom){
+            ///Log.i("Lokacija", lat + " " + lng);
             player.setLatitude(lat);
             player.setLongitude(lng);
             for(int i = 0; i < players.size(); i++){
+                Log.i("LokacijaPL", " " + i  +  " "+ players.get(i).getLatitude() + " " + players.get(i).getLongitude());
                 Location location2 = new Location("locationB");
                 location2.setLatitude(players.get(i).getLatitude());
                 location2.setLongitude(players.get(i).getLongitude());
+                mDistance  = location.distanceTo(location2);
                 players.get(i).setDistance(location.distanceTo(location2));
                 Log.i("ATSTUMAS", players.get(i).getName() + " "+ "lat " +
                 players.get(i).getLatitude() + " lng " + players.get(i).getLongitude() + "\n" +
@@ -1329,6 +1358,7 @@ public class MainActivity1 extends Activity
                 + "\n Atstumas"  + players.get(i).getDistance());
             }
         }
+        */
     }
 
     public static boolean mapOpen = false;
@@ -1443,14 +1473,20 @@ public class MainActivity1 extends Activity
     private int mAzimuth = 0; // degree
     float[] orientation = new float[3];
     float[] rMat = new float[9];
-    double angle = 0;
+    //double angle = 0;
+
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureUpdated(SurfaceTexture surface) {
             double uLat = 55.00509565857462; //54.9823894;
             double uLng = 25.795183178270236; //25.76502240000002;
-            angle = bearing(lat, lng, uLat, uLng); // 226,72568
-            Log.i("AZIMUTAS1 ", "textureView metode = " + angle);
+            //angle = bearing(lat, lng, uLat, uLng); // 226,72568
+            //Log.i("AZIMUTAS1 ", "textureView metode = " + angle);
+
+            // tikrinti ar neisejo kas is zaidimo?
+            for(int i = 0; i < players.size(); i++){
+                players.get(i).setAngle(bearing(lat, lng, players.get(i).getLatitude(), players.get(i).getLongitude()));
+            }
         }
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
@@ -1619,49 +1655,39 @@ public class MainActivity1 extends Activity
         }else if (mySensor.getType() == Sensor.TYPE_ROTATION_VECTOR && mCurScreen == R.id.screen_game) {
             // paduodamas angle su n-1 zaidejais
             // turi nupiesti n-1 blip'u kiekviena karta
-            
-                // calculate th rotation matrix
-                SensorManager.getRotationMatrixFromVector( rMat, sensorEvent.values );
-                // get the azimuth value (orientation[0]) in degree
-                mAzimuth = (int) ( Math.toDegrees( SensorManager.getOrientation( rMat, orientation )[0] ) + 360 ) % 360;
-                Log.i("AZIMUTAS ", "onChanged metode = " + mAzimuth);
-                //teorinio
-                double minAzimuth = angle - accurancy;
-                double maxAzimuth = angle + accurancy;
-                // GALI BUTI KLAIDU !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                /*if (minAzimuth > 360){
-                    minAzimuth -= 360;
-                }*/
-                if (minAzimuth < 0){
-                    minAzimuth += 360;
-                }
-                if (maxAzimuth > 360){
-                    maxAzimuth -= 360;
-                }
-                /*if (maxAzimuth < 0){
-                    maxAzimuth += 360;
-                }*/
-                double temp;
-                if (minAzimuth > maxAzimuth){
-                    temp = minAzimuth;
-                    minAzimuth = maxAzimuth;
-                    maxAzimuth = temp;
-                }
-                /*if (angle >= minAzimuth && angle <= maxAzimuth){
-                    arText.setVisibility(View.VISIBLE);
-                    arText.setText("RADAU " + mAzimuth + "\n min \n" + minAzimuth + "\n max \n" + maxAzimuth);
-                    //Log.i("AZIMUTAS ", "MATOMAS " + mAzimuth);
-                }else {
-                    arText.setVisibility(View.INVISIBLE);
-                }*/
-                if (isBetween(minAzimuth, maxAzimuth, mAzimuth)){
-                    //arText.setVisibility(View.VISIBLE);
-                    //arText.setText("RADAU " + mAzimuth + "\n min \n" + minAzimuth + "\n max \n" + maxAzimuth);
-                    personImage.setVisibility(View.VISIBLE);
-                }else{
-                    //arText.setVisibility(View.INVISIBLE);
-                    personImage.setVisibility(View.INVISIBLE);
-                }
+
+            /*//-----------------------------PIESIAMAS DEFAULT BLIP'as---------------------------------------------
+            // calculate th rotation matrix
+            SensorManager.getRotationMatrixFromVector(rMat, sensorEvent.values);
+            // get the azimuth value (orientation[0]) in degree
+            mAzimuth = (int) (Math.toDegrees(SensorManager.getOrientation(rMat, orientation)[0]) + 360) % 360;
+            Log.i("AZIMUTAS ", "onChanged metode = " + mAzimuth);
+            //teorinio
+            double minAzimuth = angle - accurancy;
+            double maxAzimuth = angle + accurancy;
+
+            if (minAzimuth < 0){
+                minAzimuth += 360;
+            }
+            if (maxAzimuth > 360){
+                maxAzimuth -= 360;
+            }
+
+            double temp;
+            if (minAzimuth > maxAzimuth){
+                temp = minAzimuth;
+                minAzimuth = maxAzimuth;
+                maxAzimuth = temp;
+            }
+
+            if (isBetween(minAzimuth, maxAzimuth, mAzimuth)){
+                //arText.setVisibility(View.VISIBLE);
+                //arText.setText("RADAU " + mAzimuth + "\n min \n" + minAzimuth + "\n max \n" + maxAzimuth);
+                personImage.setVisibility(View.VISIBLE);
+            }else{
+                //arText.setVisibility(View.INVISIBLE);
+                personImage.setVisibility(View.INVISIBLE);
+            }
             // piesti blip cia
             double xPos, yPos;
             double dist;
@@ -1693,14 +1719,178 @@ public class MainActivity1 extends Activity
                 params.topMargin = (int) (centerY - yPos*100); // y koord
                 params.leftMargin = (int) (centerX + xPos*100); // x koord
                 rlMain.addView(blip, params);
+            }*/
+            //-----------------------------------------------------------------------------------------------
+            //-------------------------------------SU VISAIS ZAIDEJAIS---------------------------------------
+            // calculate th rotation matrix
+            for(int i = 0; i < players.size(); i++) {
+                Log.i("ZAIDEJU SK", String.valueOf(players.size()));
+                SensorManager.getRotationMatrixFromVector(rMat, sensorEvent.values);
+                // get the azimuth value (orientation[0]) in degree
+                mAzimuth = (int) (Math.toDegrees(SensorManager.getOrientation(rMat, orientation)[0]) + 360) % 360;
+                Log.i("AZIMUTAS ", "onChanged metode = " + mAzimuth);
+                //teorinio
+                double minAzimuth = players.get(i).getAngle() - accurancy;
+                double maxAzimuth = players.get(i).getAngle() + accurancy;
+                // GALI BUTI KLAIDU !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                /*if (minAzimuth > 360){
+                    minAzimuth -= 360;
+                }*/
+                if (minAzimuth < 0) {
+                    minAzimuth += 360;
+                }
+                if (maxAzimuth > 360) {
+                    maxAzimuth -= 360;
+                }
+                /*if (maxAzimuth < 0){
+                    maxAzimuth += 360;
+                }*/
+                double temp;
+                if (minAzimuth > maxAzimuth) {
+                    temp = minAzimuth;
+                    minAzimuth = maxAzimuth;
+                    maxAzimuth = temp;
+                }
+                /*if (angle >= minAzimuth && angle <= maxAzimuth){
+                    arText.setVisibility(View.VISIBLE);
+                    arText.setText("RADAU " + mAzimuth + "\n min \n" + minAzimuth + "\n max \n" + maxAzimuth);
+                    //Log.i("AZIMUTAS ", "MATOMAS " + mAzimuth);
+                }else {
+                    arText.setVisibility(View.INVISIBLE);
+                }*/
+                if (isBetween(minAzimuth, maxAzimuth, mAzimuth)) {
+                    //arText.setVisibility(View.VISIBLE);
+                    //arText.setText("RADAU " + mAzimuth + "\n min \n" + minAzimuth + "\n max \n" + maxAzimuth);
+                    personImage.setVisibility(View.VISIBLE);
+                } else {
+                    //arText.setVisibility(View.INVISIBLE);
+                    personImage.setVisibility(View.INVISIBLE);
+                }
+                // piesti blip cia
+                double xPos, yPos;
+                double dist = -1;
+                /*dist = mDistance;  // nebus sugadintas mDistance????????????????????????????????????????????????
+                if (dist > 70)
+                    dist = 70;*/
+                Log.i("DIST", String.valueOf(dist));
+
+                xPos = Math.sin(Math.toRadians(mAzimuth)) * dist;
+                yPos = Math.sqrt(Math.pow(dist, 2) - Math.pow(xPos, 2));
+                if (mAzimuth > 90 && mAzimuth < 270)
+                    yPos *= -1;
+
+                // blip'u vaizdavimas radare
+                // raudoni - priesininkai
+                // balti - tos pacios komandos nariai
+                // patikrinti is kurios komandos, gauti koord ir vaizduoti visus vienu metu (be saves)
+                if (System.currentTimeMillis() - blipTime > 100) {
+                    blipTime = System.currentTimeMillis();
+                    if (blipInView) {
+                        rlMain.removeView(blip);
+                    }
+                    blipInView = true;
+                    blip = new ImageView(this);
+                    if (player.getTeam().equals(players.get(i).getTeam())){
+                        blip.setImageResource(R.drawable.blip);
+                    }else {
+                        blip.setImageResource(R.drawable.redblip);
+                    }
+
+                    params = new RelativeLayout.LayoutParams(20, 20);// mastelis figuros
+                    // center
+                    Log.i("XPOS", String.valueOf(centerY - yPos * 10));
+                    Log.i("XPOS", String.valueOf(centerX + xPos * 10));
+                    params.topMargin = (int) (centerY - yPos * 100); // y koord
+                    params.leftMargin = (int) (centerX + xPos * 100); // x koord
+                    rlMain.addView(blip, params);
+
+                    //------------------------------------------------------------------------------
+                    params = new RelativeLayout.LayoutParams(200, 200);// mastelis figuros
+                    playerView = new ImageView(this);
+                    //Drawable drawable = new BitmapDrawable(getResources(), String.valueOf(BitmapDescriptorFactory.fromBitmap(getBitmapFromURL(MainActivity1.players.get(i).getImageUrl()))));
+                    //playerView.setImageDrawable(drawable);
+                    //playerView.setImageURI(mParticipants.get(i).getIconImageUri());
+                    //playerView.setImageResource(R.drawable.blip);
+                   // playerView.setImageURI(mParticipants.get(i).getIconImageUri());
+
+                    GetXMLTask task = new GetXMLTask();
+                    // Execute the task
+                    task.execute(new String[] { players.get(i).getImageUrl()});
+
+                    Log.i("IMAGEVIEW", MainActivity1.players.get(i).getImageUrl());
+                    params.topMargin = 600; // y koord
+                    params.leftMargin = 100; // x koord
+                    rlMain.addView(playerView, params);
+                }
             }
+            //--------------------------------------------------------------------------------------
         }
     }
+
+    private class GetXMLTask extends AsyncTask<String, Void, Bitmap> {
+        @Override
+        protected Bitmap doInBackground(String... urls) {
+            Bitmap map = null;
+            for (String url : urls) {
+                map = downloadImage(url);
+            }
+            return map;
+        }
+
+        // Sets the Bitmap returned by doInBackground
+        @Override
+        protected void onPostExecute(Bitmap result) {
+            playerView.setImageBitmap(MapsActivity.getCircularBitmap(result));
+        }
+
+        // Creates Bitmap from InputStream and returns it
+        private Bitmap downloadImage(String url) {
+            Bitmap bitmap = null;
+            InputStream stream = null;
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+            bmOptions.inSampleSize = 1;
+
+            try {
+                stream = getHttpConnection(url);
+                bitmap = BitmapFactory.
+                        decodeStream(stream, null, bmOptions);
+                stream.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            return bitmap;
+        }
+
+        // Makes HttpURLConnection and returns InputStream
+        private InputStream getHttpConnection(String urlString)
+                throws IOException {
+            InputStream stream = null;
+            URL url = new URL(urlString);
+            URLConnection connection = url.openConnection();
+
+            try {
+                HttpURLConnection httpConnection = (HttpURLConnection) connection;
+                httpConnection.setRequestMethod("GET");
+                httpConnection.connect();
+
+                if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    stream = httpConnection.getInputStream();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            return stream;
+        }
+    }
+    //----------------------------------------------------------------------------------------------
+
     double centerX = 240;
     double centerY = 200;
     long blipTime = 0;
     ImageView blip;
+    ImageView playerView;
     boolean blipInView = false;
+    boolean playerInView = false;
     double accurancy = 30;
     int width;
     int height;

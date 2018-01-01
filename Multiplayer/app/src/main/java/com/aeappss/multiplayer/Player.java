@@ -14,6 +14,7 @@ public class Player {
     private double longitude = 0; //default
     private double distance = 0; //default
     private String team;
+    private double angle = 0; //default
 
     public String getTeam() {
         return team;
@@ -27,11 +28,17 @@ public class Player {
         return distance;
     }
 
+    public double getAngle() {
+        return angle;
+    }
+
     public void setDistance(double distance) {
         this.distance = distance;
     }
 
-
+    public void setAngle(double angle) {
+        this.angle = angle;
+    }
     public String getId() {
         return id;
     }
